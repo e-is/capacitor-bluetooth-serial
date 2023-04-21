@@ -39,7 +39,7 @@ Interface and type definitions can be found [here](./src/definitions.ts).
 
 - [BluetoothSerial.isEnabled](#isEnabled)
 - [BluetoothSerial.enable](#enable)
-- [BluetoothSerial.disable](#disable)-
+- [BluetoothSerial.disable](#disable)
 - [BluetoothSerial.startEnabledNotifications](#startEnabledNotifications)
 - [BluetoothSerial.stopEnabledNotifications](#stopEnabledNotifications)
 - [BluetoothSerial.scan](#scan)
