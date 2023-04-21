@@ -185,15 +185,15 @@ BluetoothSerial
 ```
 
 
-## stopNotifications
+## stopEnabledNotifications
 
 Stops the propagation of value changes.
 
-`stopNotifications(options: BluetoothDisableNotificationsOptions): Promise<void>`;
+`stopEnabledNotifications(): Promise<void>`;
 
 ### Description
 
-Function `stopNotifications` disable bluetooth state notifications. Additionally, the event listener has to be removed.
+Function `stopEnabledNotifications` disable bluetooth state notifications. Additionally, the event listener has to be removed.
 
 ```typescript
 eventListener.remove();
