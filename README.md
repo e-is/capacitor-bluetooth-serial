@@ -1,6 +1,8 @@
 # Capacitor Bluetooth Serial Plugin
 
-A client implementation for interacting with Bluetooth (serial)
+Forked from [capacitor-bluetooth-serial](https://github.com/agro1desenvolvimento/capacitor-bluetooth-serial) (archived)
+
+A client implementation for interacting with Bluetooth (serial), using Capacitor.
 
 Supported platforms
 
@@ -8,11 +10,15 @@ Supported platforms
 - [x] Android
 - [ ] iOS
 
+Supported Capacitor versions:
+- Capacitor <= 3: Please use [capacitor-bluetooth-serial](https://github.com/agro1desenvolvimento/capacitor-bluetooth-serial) (<= v0.0.3)
+- Capacitor 4 (v0.4.x)
+
 ## Usage
 
 Install the plugin via npm
 ```
-npm install --save capacitor-bluetooth-serial
+npm install --save @e-is/capacitor-bluetooth-serial
 ```
 
 
@@ -41,8 +47,8 @@ Interface and type definitions can be found [here](./src/definitions.ts).
 - [BluetoothSerial.isConnected](#isConnected)
 - [BluetoothSerial.read](#read)
 - [BluetoothSerial.readUntil](#readUntil)
-- [BluetoothSerial.enableNotifications](#enableNotifications)
-- [BluetoothSerial.disableNotifications](#disableNotifications)
+- [BluetoothSerial.startNotifications](#startNotifications)
+- [BluetoothSerial.stopNotifications](#stopNotifications)
 - [BluetoothSerial.enableRawNotifications](#enableRawNotifications)
 - [BluetoothSerial.disableRawNotifications](#disableRawNotifications)
 - [BluetoothSerial.write](#write)
@@ -139,6 +145,45 @@ BluetoothSerial
     console.log('Error disabling bluetooth');
   });
 ```
+
+
+## startEnabledNotifications
+
+Be notified when bluetooth status changed.
+
+`startEnabledNotifications(): Promise<void>`;
+
+### Description
+
+Function `startEnabledNotifications` enable status notifications. In order to retrieve the values, use an Event Listener with 'onEnabledChanged' as event name.
+
+``` typescript
+const listener = BluetoothSerial.addListener('onEnabledChanged' , (response: BluetoothState) => {
+
+    const { enabled } = response;
+    //Do something with enabled variable
+});
+```
+
+### Parameters
+
+None.
+
+### Quick Example
+
+```typescript
+BluetoothSerial
+  .startEnabledNotifications()
+  .then(() => {
+    removeListenerFunc = BluetoothSerial.addListener('onEnabledChanged', (data: BluetoothState) => {
+        console.log('Bluetooth state changed to ' + (data.enabled ? 'Enabled' : 'Disabled'));
+      });
+  })
+  .catch(() => {
+    console.log('Error starting enabled listener');
+  });
+```
+
 
 ## scan
 
@@ -392,7 +437,7 @@ Enable and be notified when any data is received.
 
 ### Description
 
-Function `startNotifications` enable notifications. The success callback will return an event name. In order to retrieve the values, use an Event Listener with 'onRead' as event name.
+Function `startNotifications` enable notifications. In order to retrieve the values, use an Event Listener with 'onRead' as event name.
 
 ``` typescript
 const listener = BluetoothSerial.addListener('onRead' , (response: BluetoothReadResult) => {
@@ -457,14 +502,6 @@ BluetoothSerial
     console.log('Error disabling listener for device');
   });
 ```
-
-## enableRawNotifications
-
-  Under development.
-
-## disableRawNotifications
-
-  Under development.
 
 ## write
 
