@@ -16,10 +16,20 @@ class OptionsRequiredError extends Error {
 
 class BluetoothSerialWeb extends core.WebPlugin {
     async isEnabled() {
-        throw new Error('Method not implemented.');
+        // not available on web
+        return { enabled: true };
     }
     async enable() {
-        throw new Error('Method not implemented.');
+        throw this.unavailable('enable is not available on web.');
+    }
+    disable() {
+        throw this.unavailable('disable is not available on web.');
+    }
+    startEnabledNotifications() {
+        throw this.unavailable('disable is not available on web.');
+    }
+    stopEnabledNotifications() {
+        throw this.unavailable('disable is not available on web.');
     }
     async scan() {
         throw new Error('Method not implemented.');
@@ -66,13 +76,13 @@ class BluetoothSerialWeb extends core.WebPlugin {
         }
         throw new Error('Method not implemented.');
     }
-    async enableNotifications(options) {
+    async startNotifications(options) {
         if (!options) {
             return Promise.reject(new OptionsRequiredError());
         }
         throw new Error('Method not implemented.');
     }
-    async disableNotifications(options) {
+    async stopNotifications(options) {
         if (!options) {
             return Promise.reject(new OptionsRequiredError());
         }

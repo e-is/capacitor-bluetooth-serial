@@ -3,11 +3,10 @@ package com.bluetoothserial;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.os.Build;
 import android.util.Log;
 
-import com.bluetoothserial.plugin.BluetoothSerial;
-import com.getcapacitor.JSObject;
-import com.getcapacitor.Plugin;
+import com.bluetoothserial.plugin.BluetoothSerialPlugin;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,35 +16,35 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 public class BluetoothSerialService {
     private static final UUID DEFAULT_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     private static final String TAG = "BluetoothSerialService";
-    private static final String SUBSCRIBE_EVENT = "subscribe";
 
     private BluetoothAdapter adapter;
-    private BluetoothSerial plugin;
+    private BluetoothSerialPlugin plugin;
     private Map<String, BluetoothConnection> connections = new HashMap<>();
 
-    public BluetoothSerialService(BluetoothSerial plugin, BluetoothAdapter adapter) {
+    public BluetoothSerialService(BluetoothSerialPlugin plugin, BluetoothAdapter adapter) {
         this.plugin = plugin;
         this.adapter = adapter;
     }
 
-    public void connect(BluetoothDevice device, BluetoothSerial serial) {
+    public void connect(BluetoothDevice device, BluetoothSerialPlugin serial) {
         connect(device, true, serial);
     }
 
     // TODO
-    public void connectInsecure(BluetoothDevice device, BluetoothSerial serial) {
+    public void connectInsecure(BluetoothDevice device, BluetoothSerialPlugin serial) {
         connect(device, false, serial);
     }
 
-    private void connect(BluetoothDevice device, boolean secure, BluetoothSerial serial) {
-        BluetoothConnection connectionThread = new BluetoothConnection(device, secure, serial);
-        connectionThread.start();
+    private void connect(BluetoothDevice device, boolean secure, BluetoothSerialPlugin serial) {
+        BluetoothConnection connection = new BluetoothConnection(device, secure, serial);
+        connection.start();
 
-        connections.put(device.getAddress(), connectionThread);
+        connections.put(device.getAddress(), connection);
     }
 
     public boolean disconnectAllDevices() {
@@ -161,24 +160,23 @@ public class BluetoothSerialService {
         return connection.readUntil(delimiter);
     }
 
-    public String enableNotifications(String address, String delimiter) throws IOException {
+    public void startNotifications(String address, String delimiter, Consumer<String> callback) throws IOException {
         BluetoothConnection connection = getConnection(address);
 
-        if(connection == null) {
+        if (connection == null) {
             Log.e(TAG, "No connection found");
             throw new IOException("No connection found");
         }
 
-        if(!connection.isConnected()) {
+        if (!connection.isConnected()) {
             Log.e(TAG, "Not connected");
-
             throw new IOException("Not connected");
         }
 
-        return connection.enableNotifications(delimiter);
+        connection.startNotifications(delimiter, callback);
     }
 
-    public void disableNotifications(String address) throws IOException {
+    public void stopNotifications(String address) throws IOException {
         BluetoothConnection connection = getConnection(address);
 
         if(connection == null) {
@@ -192,7 +190,7 @@ public class BluetoothSerialService {
             throw new IOException("Not connected");
         }
 
-        connection.disableNotifications();
+        connection.stopNotifications();
     }
 
     private BluetoothConnection getConnection(String address) {
@@ -233,36 +231,35 @@ public class BluetoothSerialService {
     private class BluetoothConnection extends Thread {
         private final BluetoothDevice device;
         private final boolean secure;
-        private final BluetoothSerial serial;
+        private final BluetoothSerialPlugin plugin;
+
         private BluetoothSocket socket = null;
-        private InputStream inStream;
-        private OutputStream outStream;
-        private StringBuffer buffer;
+        private InputStream socketInputStream;
+        private OutputStream socketOutputStream;
+
         private boolean enabledNotifications;
-        private boolean enabledRawNotifications;
-        private String subscribeDelimiter;
-        private int errorCount = 0;
+        private String notificationDelimiter;
+        private StringBuffer readBuffer;
+        private Consumer<String> notificationCallback;
         private ConnectionStatus status;
 
-        public BluetoothConnection(BluetoothDevice device, boolean secure, BluetoothSerial serial) {
+        public BluetoothConnection(BluetoothDevice device, boolean secure, BluetoothSerialPlugin plugin) {
             this.device = device;
             this.secure = secure;
-            this.serial = serial;
+            this.plugin = plugin;
             this.status = ConnectionStatus.NOT_CONNECTED;
             adapter.cancelDiscovery();
 
             createRfcomm(device, secure);
 
-            inStream = getInputStream(socket);
-            outStream = getOutputStream(socket);
-            buffer = new StringBuffer();
+            socketInputStream = getInputStream(socket);
+            socketOutputStream = getOutputStream(socket);
+            readBuffer = new StringBuffer();
             this.enabledNotifications = false;
-            this.enabledRawNotifications = false;
         }
 
         public BluetoothConnection(BluetoothConnection connection) {
-            this(connection.device, connection.secure, connection.serial);
-            this.enabledRawNotifications = connection.enabledRawNotifications;
+            this(connection.device, connection.secure, connection.plugin);
             this.enabledNotifications = connection.enabledNotifications;
         }
 
@@ -295,75 +292,46 @@ public class BluetoothSerialService {
 
         public void run() {
             Log.i(TAG, "BEGIN connectedThread");
-            byte[] buffer = new byte[1024];
-            int bytes;
+            byte[] bytesBuffer = new byte[1024];
 
             // Keep listening to the InputStream while connected
             while (true) {
-                if(status == ConnectionStatus.CONNECTED) {
+                if (status == ConnectionStatus.CONNECTED) {
                     try {
                         // Read from the InputStream
-                        bytes = inStream.read(buffer);
-                        String data = new String(buffer, 0, bytes);
-
-                        this.buffer.append(data);
-
-                        if (areNotificationsEnabled()) {
-                            notifySubscribers(buffer);
-                        }
+                        int length = socketInputStream.read(bytesBuffer);
+                        String data = new String(bytesBuffer, 0, length);
+                        appendToBuffer(data);
                     } catch (IOException e) {
                         Log.e(TAG, "disconnected", e);
-                        errorCount += 1;
-                        // TODO - ver solução melhor para quando disconecta
-                        //               connectionLost();
-                        // Start the service over to restart listening mode
-                        //              BluetoothSerialService.this.start();
-                        //System.out.println(BluetoothSerialService.this);
-                        //break;
-                        //  reconnect();
-                   /* if(errorCount <= 3) {
-                        Log.i(TAG, "reconnecting", e);
-                        reconnect();
-                    } else {
-                        BluetoothSerialService.this.disconnect(device.getAddress());
                         break;
-                    }*/
-                        break;
+                    }
+                }
+            }
+            Log.i(TAG, "END connectedThread");
+        }
 
-                        //BluetoothSerialService.this.reconnect(device.getAddress());
-                        // TODO - se não conseguir reconectar, encerrar thread
+        private void appendToBuffer(String data) {
+            synchronized (this.readBuffer) {
+                this.readBuffer.append(data);
+            }
+            if (this.enabledNotifications) {
+                while (this.readBuffer.indexOf(this.notificationDelimiter) >= 0) {
+                    String value = readUntil(this.notificationDelimiter);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                        notificationCallback.accept(value);
                     }
                 }
             }
         }
 
-        public boolean areNotificationsEnabled() {
-            return this.enabledNotifications || this.enabledRawNotifications;
-        }
-
-        public void notifySubscribers(byte[] bytes) {
-            if (this.enabledNotifications) {
-                while (buffer.indexOf(this.subscribeDelimiter) >= 0) {
-                    String data = readUntil(this.subscribeDelimiter);
-                    JSObject ret = new JSObject();
-                    ret.put("data", data);
-
-                    plugin.notifyClient(SUBSCRIBE_EVENT, ret);
-                }
-            }
-            if (this.enabledRawNotifications) {
-                // TODO - implementar
-                // enviar bytes
-            }
-        }
-
         public synchronized String read() {
             String data;
-            synchronized (buffer) {
-                int index = buffer.length();
+            synchronized (readBuffer) {
+                int index = readBuffer.length();
 
-                data = buffer.substring(0, index);
-                buffer.delete(0, index);
+                data = readBuffer.substring(0, index);
+                readBuffer.delete(0, index);
             }
 
             return data;
@@ -371,27 +339,26 @@ public class BluetoothSerialService {
 
         public synchronized String readUntil(String delimiter) {
             String data = "";
-            synchronized (buffer) {
-                int index = buffer.indexOf(delimiter);
+            synchronized (readBuffer) {
+                int index = readBuffer.indexOf(delimiter);
 
                 if (index >= 0) {
                     index += delimiter.length();
-                    data = buffer.substring(0, index);
-                    buffer.delete(0, index+1);
+                    data = readBuffer.substring(0, index);
+                    readBuffer.delete(0, index+1);
                 }
             }
 
             return data;
         }
 
-        public synchronized String enableNotifications(String delimiter) {
+        public synchronized void startNotifications(String delimiter, Consumer<String> callback) {
             enabledNotifications = true;
-            this.subscribeDelimiter = delimiter;
-
-            return SUBSCRIBE_EVENT;
+            this.notificationDelimiter = delimiter;
+            this.notificationCallback = callback;
         }
 
-        public synchronized void disableNotifications() {
+        public synchronized void stopNotifications() {
             enabledNotifications = false;
         }
 
@@ -402,7 +369,7 @@ public class BluetoothSerialService {
          */
         public void write(byte[] buffer) {
             try {
-                outStream.write(buffer);
+                socketOutputStream.write(buffer);
             } catch (IOException e) {
                 Log.e(TAG, "Exception during write", e);
                 /*reconnect();
@@ -434,22 +401,22 @@ public class BluetoothSerialService {
             }
 
             createRfcomm(device, secure);
-            inStream = getInputStream(socket);
-            outStream = getOutputStream(socket);
+            socketInputStream = getInputStream(socket);
+            socketOutputStream = getOutputStream(socket);
 
         }
 
         private void connected() {
             Log.d(TAG, "Connected");
             status = ConnectionStatus.CONNECTED;
-            this.serial.connected();
+            this.plugin.connected();
         }
 
         private void connectionFailed() {
             Log.e(TAG, "Connection Failed for device " + device.getAddress());
             status = ConnectionStatus.NOT_CONNECTED;
 
-            this.serial.connectionFailed();
+            this.plugin.connectionFailed();
         }
 
         public boolean isConnected() {

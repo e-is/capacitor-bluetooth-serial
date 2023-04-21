@@ -1,16 +1,40 @@
-
-import { WebPlugin } from '@capacitor/core';
-import { BluetoothConnectOptions, BluetoothConnectResult, BluetoothDataResult, BluetoothDisableNotificationsOptions, BluetoothEnabledResult, BluetoothEnableNotificationsOptions, BluetoothEnableNotificationsResult, BluetoothReadOptions, BluetoothReadUntilOptions, BluetoothScanResult, BluetoothSerialPlugin, BluetoothWriteOptions } from './definitions';
-import { OptionsRequiredError } from './utils/errors';
+import {WebPlugin} from '@capacitor/core';
+import {
+  BluetoothConnectOptions,
+  BluetoothConnectResult,
+  BluetoothStopNotificationsOptions,
+  BluetoothStartNotificationsOptions,
+  BluetoothReadOptions,
+  BluetoothReadResult,
+  BluetoothReadUntilOptions,
+  BluetoothScanResult,
+  BluetoothSerialPlugin,
+  BluetoothState,
+  BluetoothWriteOptions
+} from './definitions';
+import {OptionsRequiredError} from './utils/errors';
 
 export class BluetoothSerialWeb extends WebPlugin implements BluetoothSerialPlugin {
 
-  async isEnabled(): Promise<BluetoothEnabledResult> {
-    throw new Error('Method not implemented.');
+  async isEnabled(): Promise<BluetoothState> {
+    // not available on web
+    return {enabled: true};
   }
 
-  async enable(): Promise<BluetoothEnabledResult> {
-    throw new Error('Method not implemented.');
+  async enable(): Promise<BluetoothState> {
+    throw this.unavailable('enable is not available on web.');
+  }
+
+  disable(): Promise<BluetoothState> {
+    throw this.unavailable('disable is not available on web.');
+  }
+
+  startEnabledNotifications(): Promise<void> {
+    throw this.unavailable('disable is not available on web.');
+  }
+
+  stopEnabledNotifications(): Promise<void> {
+    throw this.unavailable('disable is not available on web.');
   }
 
   async scan(): Promise<BluetoothScanResult> {
@@ -46,14 +70,14 @@ export class BluetoothSerialWeb extends WebPlugin implements BluetoothSerialPlug
   }
 
   async read(options: BluetoothReadOptions):
-      Promise<BluetoothDataResult> {
+      Promise<BluetoothReadResult> {
     if (!options) {
       return Promise.reject(new OptionsRequiredError());
     }
     throw new Error('Method not implemented.');
   }
 
-  async readUntil(options: BluetoothReadUntilOptions): Promise<BluetoothDataResult> {
+  async readUntil(options: BluetoothReadUntilOptions): Promise<BluetoothReadResult> {
     if (!options) {
       return Promise.reject(new OptionsRequiredError());
     }
@@ -67,22 +91,19 @@ export class BluetoothSerialWeb extends WebPlugin implements BluetoothSerialPlug
     throw new Error('Method not implemented.');
   }
 
-  async enableNotifications(options: BluetoothEnableNotificationsOptions):
-      Promise<BluetoothEnableNotificationsResult> {
+  async startNotifications(options: BluetoothStartNotificationsOptions): Promise<void> {
     if (!options) {
       return Promise.reject(new OptionsRequiredError());
     }
     throw new Error('Method not implemented.');
   }
 
-  async disableNotifications(options: BluetoothDisableNotificationsOptions):
-      Promise<void> {
+  async stopNotifications(options: BluetoothStopNotificationsOptions): Promise<void> {
     if (!options) {
       return Promise.reject(new OptionsRequiredError());
     }
     throw new Error('Method not implemented.');
   }
-
 }
 
 const BluetoothSerial = new BluetoothSerialWeb();

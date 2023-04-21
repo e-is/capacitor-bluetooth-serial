@@ -1,8 +1,28 @@
+import {PluginListenerHandle} from "@capacitor/core";
+
 export interface BluetoothSerialPlugin {
 
-  isEnabled(): Promise<BluetoothEnabledResult>;
+  isEnabled(): Promise<BluetoothState>;
 
-  enable(): Promise<BluetoothEnabledResult>;
+  enable(): Promise<BluetoothState>;
+
+  /**
+   * Disable bluetooth (turn bluetooth off)
+   * @since 0.0.5
+   */
+  disable(): Promise<BluetoothState>;
+
+  /**
+   * Start to listen bluetooth state changes (will emit a 'onEnabledChanged' event when state changed)
+   * @since 0.0.5
+   */
+  startEnabledNotifications(): Promise<void>;
+
+  /**
+   * Stop to listen bluetooth state changes
+   * @since 0.0.5
+   */
+  stopEnabledNotifications(): Promise<void>;
 
   scan(): Promise<BluetoothScanResult>;
 
@@ -14,19 +34,42 @@ export interface BluetoothSerialPlugin {
 
   isConnected(options: BluetoothConnectOptions): Promise<BluetoothConnectResult>;
 
-  read(options: BluetoothReadOptions): Promise<BluetoothDataResult>;
+  read(options: BluetoothReadOptions): Promise<BluetoothReadResult>;
 
-  readUntil(options: BluetoothReadUntilOptions): Promise<BluetoothDataResult>;
+  readUntil(options: BluetoothReadUntilOptions): Promise<BluetoothReadResult>;
 
   write(options: BluetoothWriteOptions): Promise<void>;
 
-  enableNotifications(options: BluetoothEnableNotificationsOptions): Promise<BluetoothEnableNotificationsResult>;
+  startNotifications(options: BluetoothStartNotificationsOptions): Promise<void>;
 
-  disableNotifications(options: BluetoothDisableNotificationsOptions): Promise<void>;
+  stopNotifications(options: BluetoothStopNotificationsOptions): Promise<void>;
 
+  /**
+   * Listen for device input value
+   * @since 0.0.5
+   */
+  addListener(
+      eventName: 'onRead',
+      listenerFunc: (result: BluetoothReadResult) => void,
+  ): PluginListenerHandle;
+
+  /**
+   * Listen for bluetooth state changed
+   * @since 0.0.5
+   */
+  addListener(
+      eventName: 'onEnabledChanged',
+      listenerFunc: (result: BluetoothState) => void,
+  ): PluginListenerHandle;
+
+  /**
+  *
+  * @since 0.0.5
+  */
+  removeAllListeners(): Promise<void>;
 }
 
-export interface BluetoothEnabledResult {
+export interface BluetoothState {
   enabled: boolean;
 }
 
@@ -38,12 +81,8 @@ export interface BluetoothConnectResult {
   connected: boolean;
 }
 
-export interface BluetoothDataResult {
-  data: string;
-}
-
-export interface BluetoothEnableNotificationsResult {
-  eventName: string;
+export interface BluetoothReadResult {
+  value: string;
 }
 
 export interface BluetoothDevice {
@@ -73,11 +112,11 @@ export interface BluetoothWriteOptions {
     value: string;
 }
 
-export interface BluetoothEnableNotificationsOptions {
+export interface BluetoothStartNotificationsOptions {
   address: string;
   delimiter: string;
 }
 
-export interface BluetoothDisableNotificationsOptions {
+export interface BluetoothStopNotificationsOptions {
   address: string;
 }
