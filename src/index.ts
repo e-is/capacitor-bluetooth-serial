@@ -2,7 +2,7 @@ import { registerPlugin } from '@capacitor/core';
 
 import type { BluetoothSerialPlugin } from './definitions';
 
-const BluetoothSerial= registerPlugin<BluetoothSerialPlugin>(
+const BluetoothSerial = registerPlugin<BluetoothSerialPlugin>(
   'BluetoothSerial',
   {
     web: () => import('./web').then(m => new m.BluetoothSerialWeb()),
@@ -10,4 +10,4 @@ const BluetoothSerial= registerPlugin<BluetoothSerialPlugin>(
 );
 
 export * from './definitions';
-export { BluetoothSerial};
+export { BluetoothSerial };

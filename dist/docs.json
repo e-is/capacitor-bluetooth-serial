@@ -7,33 +7,80 @@
     "methods": [
       {
         "name": "isEnabled",
-        "signature": "() => any",
+        "signature": "() => Promise<BluetoothState>",
         "parameters": [],
-        "returns": "any",
+        "returns": "Promise<BluetoothState>",
         "tags": [],
         "docs": "",
         "complexTypes": [
-          "BluetoothEnabledResult"
+          "BluetoothState"
         ],
         "slug": "isenabled"
       },
       {
         "name": "enable",
-        "signature": "() => any",
+        "signature": "() => Promise<BluetoothState>",
         "parameters": [],
-        "returns": "any",
+        "returns": "Promise<BluetoothState>",
         "tags": [],
         "docs": "",
         "complexTypes": [
-          "BluetoothEnabledResult"
+          "BluetoothState"
         ],
         "slug": "enable"
       },
       {
-        "name": "scan",
-        "signature": "() => any",
+        "name": "disable",
+        "signature": "() => Promise<BluetoothState>",
         "parameters": [],
-        "returns": "any",
+        "returns": "Promise<BluetoothState>",
+        "tags": [
+          {
+            "name": "since",
+            "text": "0.0.5"
+          }
+        ],
+        "docs": "Disable bluetooth (turn bluetooth off)",
+        "complexTypes": [
+          "BluetoothState"
+        ],
+        "slug": "disable"
+      },
+      {
+        "name": "startEnabledNotifications",
+        "signature": "() => Promise<void>",
+        "parameters": [],
+        "returns": "Promise<void>",
+        "tags": [
+          {
+            "name": "since",
+            "text": "0.0.5"
+          }
+        ],
+        "docs": "Start to listen bluetooth state changes (will emit a 'onEnabledChanged' event when state changed)",
+        "complexTypes": [],
+        "slug": "startenablednotifications"
+      },
+      {
+        "name": "stopEnabledNotifications",
+        "signature": "() => Promise<void>",
+        "parameters": [],
+        "returns": "Promise<void>",
+        "tags": [
+          {
+            "name": "since",
+            "text": "0.0.5"
+          }
+        ],
+        "docs": "Stop to listen bluetooth state changes",
+        "complexTypes": [],
+        "slug": "stopenablednotifications"
+      },
+      {
+        "name": "scan",
+        "signature": "() => Promise<BluetoothScanResult>",
+        "parameters": [],
+        "returns": "Promise<BluetoothScanResult>",
         "tags": [],
         "docs": "",
         "complexTypes": [
@@ -43,7 +90,7 @@
       },
       {
         "name": "connect",
-        "signature": "(options: BluetoothConnectOptions) => any",
+        "signature": "(options: BluetoothConnectOptions) => Promise<void>",
         "parameters": [
           {
             "name": "options",
@@ -51,7 +98,7 @@
             "type": "BluetoothConnectOptions"
           }
         ],
-        "returns": "any",
+        "returns": "Promise<void>",
         "tags": [],
         "docs": "",
         "complexTypes": [
@@ -61,7 +108,7 @@
       },
       {
         "name": "connectInsecure",
-        "signature": "(options: BluetoothConnectOptions) => any",
+        "signature": "(options: BluetoothConnectOptions) => Promise<void>",
         "parameters": [
           {
             "name": "options",
@@ -69,7 +116,7 @@
             "type": "BluetoothConnectOptions"
           }
         ],
-        "returns": "any",
+        "returns": "Promise<void>",
         "tags": [],
         "docs": "",
         "complexTypes": [
@@ -79,7 +126,7 @@
       },
       {
         "name": "disconnect",
-        "signature": "(options: BluetoothConnectOptions) => any",
+        "signature": "(options: BluetoothConnectOptions) => Promise<void>",
         "parameters": [
           {
             "name": "options",
@@ -87,7 +134,7 @@
             "type": "BluetoothConnectOptions"
           }
         ],
-        "returns": "any",
+        "returns": "Promise<void>",
         "tags": [],
         "docs": "",
         "complexTypes": [
@@ -97,7 +144,7 @@
       },
       {
         "name": "isConnected",
-        "signature": "(options: BluetoothConnectOptions) => any",
+        "signature": "(options: BluetoothConnectOptions) => Promise<BluetoothConnectResult>",
         "parameters": [
           {
             "name": "options",
@@ -105,18 +152,18 @@
             "type": "BluetoothConnectOptions"
           }
         ],
-        "returns": "any",
+        "returns": "Promise<BluetoothConnectResult>",
         "tags": [],
         "docs": "",
         "complexTypes": [
-          "BluetoothConnectOptions",
-          "BluetoothConnectResult"
+          "BluetoothConnectResult",
+          "BluetoothConnectOptions"
         ],
         "slug": "isconnected"
       },
       {
         "name": "read",
-        "signature": "(options: BluetoothReadOptions) => any",
+        "signature": "(options: BluetoothReadOptions) => Promise<BluetoothReadResult>",
         "parameters": [
           {
             "name": "options",
@@ -124,18 +171,18 @@
             "type": "BluetoothReadOptions"
           }
         ],
-        "returns": "any",
+        "returns": "Promise<BluetoothReadResult>",
         "tags": [],
         "docs": "",
         "complexTypes": [
-          "BluetoothReadOptions",
-          "BluetoothDataResult"
+          "BluetoothReadResult",
+          "BluetoothReadOptions"
         ],
         "slug": "read"
       },
       {
         "name": "readUntil",
-        "signature": "(options: BluetoothReadUntilOptions) => any",
+        "signature": "(options: BluetoothReadUntilOptions) => Promise<BluetoothReadResult>",
         "parameters": [
           {
             "name": "options",
@@ -143,18 +190,18 @@
             "type": "BluetoothReadUntilOptions"
           }
         ],
-        "returns": "any",
+        "returns": "Promise<BluetoothReadResult>",
         "tags": [],
         "docs": "",
         "complexTypes": [
-          "BluetoothReadUntilOptions",
-          "BluetoothDataResult"
+          "BluetoothReadResult",
+          "BluetoothReadUntilOptions"
         ],
         "slug": "readuntil"
       },
       {
         "name": "write",
-        "signature": "(options: BluetoothWriteOptions) => any",
+        "signature": "(options: BluetoothWriteOptions) => Promise<void>",
         "parameters": [
           {
             "name": "options",
@@ -162,7 +209,7 @@
             "type": "BluetoothWriteOptions"
           }
         ],
-        "returns": "any",
+        "returns": "Promise<void>",
         "tags": [],
         "docs": "",
         "complexTypes": [
@@ -171,49 +218,121 @@
         "slug": "write"
       },
       {
-        "name": "enableNotifications",
-        "signature": "(options: BluetoothEnableNotificationsOptions) => any",
+        "name": "startNotifications",
+        "signature": "(options: BluetoothStartNotificationsOptions) => Promise<void>",
         "parameters": [
           {
             "name": "options",
             "docs": "",
-            "type": "BluetoothEnableNotificationsOptions"
+            "type": "BluetoothStartNotificationsOptions"
           }
         ],
-        "returns": "any",
+        "returns": "Promise<void>",
         "tags": [],
         "docs": "",
         "complexTypes": [
-          "BluetoothEnableNotificationsOptions",
-          "BluetoothEnableNotificationsResult"
+          "BluetoothStartNotificationsOptions"
         ],
-        "slug": "enablenotifications"
+        "slug": "startnotifications"
       },
       {
-        "name": "disableNotifications",
-        "signature": "(options: BluetoothDisableNotificationsOptions) => any",
+        "name": "stopNotifications",
+        "signature": "(options: BluetoothStopNotificationsOptions) => Promise<void>",
         "parameters": [
           {
             "name": "options",
             "docs": "",
-            "type": "BluetoothDisableNotificationsOptions"
+            "type": "BluetoothStopNotificationsOptions"
           }
         ],
-        "returns": "any",
+        "returns": "Promise<void>",
         "tags": [],
         "docs": "",
         "complexTypes": [
-          "BluetoothDisableNotificationsOptions"
+          "BluetoothStopNotificationsOptions"
         ],
-        "slug": "disablenotifications"
+        "slug": "stopnotifications"
+      },
+      {
+        "name": "addListener",
+        "signature": "(eventName: 'onRead', listenerFunc: (result: BluetoothReadResult) => void) => PluginListenerHandle",
+        "parameters": [
+          {
+            "name": "eventName",
+            "docs": "",
+            "type": "'onRead'"
+          },
+          {
+            "name": "listenerFunc",
+            "docs": "",
+            "type": "(result: BluetoothReadResult) => void"
+          }
+        ],
+        "returns": "PluginListenerHandle",
+        "tags": [
+          {
+            "name": "since",
+            "text": "0.0.5"
+          }
+        ],
+        "docs": "Listen for device input value",
+        "complexTypes": [
+          "PluginListenerHandle",
+          "BluetoothReadResult"
+        ],
+        "slug": "addlisteneronread"
+      },
+      {
+        "name": "addListener",
+        "signature": "(eventName: 'onEnabledChanged', listenerFunc: (result: BluetoothState) => void) => PluginListenerHandle",
+        "parameters": [
+          {
+            "name": "eventName",
+            "docs": "",
+            "type": "'onEnabledChanged'"
+          },
+          {
+            "name": "listenerFunc",
+            "docs": "",
+            "type": "(result: BluetoothState) => void"
+          }
+        ],
+        "returns": "PluginListenerHandle",
+        "tags": [
+          {
+            "name": "since",
+            "text": "0.0.5"
+          }
+        ],
+        "docs": "Listen for bluetooth state changed",
+        "complexTypes": [
+          "PluginListenerHandle",
+          "BluetoothState"
+        ],
+        "slug": "addlisteneronenabledchanged"
+      },
+      {
+        "name": "removeAllListeners",
+        "signature": "() => Promise<void>",
+        "parameters": [],
+        "returns": "Promise<void>",
+        "tags": [
+          {
+            "name": "since",
+            "text": "0.0.5"
+          }
+        ],
+        "docs": "",
+        "complexTypes": [],
+        "slug": "removealllisteners"
       }
     ],
     "properties": []
   },
   "interfaces": [
     {
-      "name": "BluetoothEnabledResult",
-      "slug": "bluetoothenabledresult",
+      "name": "BluetoothState",
+      "slug": "bluetoothstate",
       "docs": "",
       "tags": [],
       "methods": [],
@@ -241,7 +360,7 @@
           "complexTypes": [
             "BluetoothDevice"
           ],
-          "type": "{}"
+          "type": "BluetoothDevice[]"
         }
       ]
     },
@@ -329,14 +448,14 @@
       ]
     },
     {
-      "name": "BluetoothReadOptions",
-      "slug": "bluetoothreadoptions",
+      "name": "BluetoothReadResult",
+      "slug": "bluetoothreadresult",
       "docs": "",
       "tags": [],
       "methods": [],
       "properties": [
         {
-          "name": "address",
+          "name": "value",
           "tags": [],
           "docs": "",
           "complexTypes": [],
@@ -345,14 +464,14 @@
       ]
     },
     {
-      "name": "BluetoothDataResult",
-      "slug": "bluetoothdataresult",
+      "name": "BluetoothReadOptions",
+      "slug": "bluetoothreadoptions",
       "docs": "",
       "tags": [],
       "methods": [],
       "properties": [
         {
-          "name": "data",
+          "name": "address",
           "tags": [],
           "docs": "",
           "complexTypes": [],
@@ -407,8 +526,8 @@
       ]
     },
     {
-      "name": "BluetoothEnableNotificationsOptions",
-      "slug": "bluetoothenablenotificationsoptions",
+      "name": "BluetoothStartNotificationsOptions",
+      "slug": "bluetoothstartnotificationsoptions",
       "docs": "",
       "tags": [],
       "methods": [],
@@ -430,24 +549,8 @@
       ]
     },
     {
-      "name": "BluetoothEnableNotificationsResult",
-      "slug": "bluetoothenablenotificationsresult",
-      "docs": "",
-      "tags": [],
-      "methods": [],
-      "properties": [
-        {
-          "name": "eventName",
-          "tags": [],
-          "docs": "",
-          "complexTypes": [],
-          "type": "string"
-        }
-      ]
-    },
-    {
-      "name": "BluetoothDisableNotificationsOptions",
-      "slug": "bluetoothdisablenotificationsoptions",
+      "name": "BluetoothStopNotificationsOptions",
+      "slug": "bluetoothstopnotificationsoptions",
       "docs": "",
       "tags": [],
       "methods": [],
@@ -460,7 +563,25 @@
           "type": "string"
         }
       ]
+    },
+    {
+      "name": "PluginListenerHandle",
+      "slug": "pluginlistenerhandle",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "remove",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [],
+          "type": "() => Promise<void>"
+        }
+      ]
     }
   ],
-  "enums": []
+  "enums": [],
+  "typeAliases": [],
+  "pluginConfigs": []
 }
