@@ -39,7 +39,9 @@ Interface and type definitions can be found [here](./src/definitions.ts).
 
 - [BluetoothSerial.isEnabled](#isEnabled)
 - [BluetoothSerial.enable](#enable)
-- [BluetoothSerial.disable](#disable)
+- [BluetoothSerial.disable](#disable)-
+- [BluetoothSerial.startEnabledNotifications](#startEnabledNotifications)
+- [BluetoothSerial.stopEnabledNotifications](#stopEnabledNotifications)
 - [BluetoothSerial.scan](#scan)
 - [BluetoothSerial.connect](#connect)
 - [BluetoothSerial.connectInsecure](#connectInsecure)
@@ -49,8 +51,6 @@ Interface and type definitions can be found [here](./src/definitions.ts).
 - [BluetoothSerial.readUntil](#readUntil)
 - [BluetoothSerial.startNotifications](#startNotifications)
 - [BluetoothSerial.stopNotifications](#stopNotifications)
-- [BluetoothSerial.enableRawNotifications](#enableRawNotifications)
-- [BluetoothSerial.disableRawNotifications](#disableRawNotifications)
 - [BluetoothSerial.write](#write)
 
 ## isEnabled
@@ -158,7 +158,7 @@ Be notified when bluetooth status changed.
 Function `startEnabledNotifications` enable status notifications. In order to retrieve the values, use an Event Listener with 'onEnabledChanged' as event name.
 
 ``` typescript
-const listener = BluetoothSerial.addListener('onEnabledChanged' , (response: BluetoothState) => {
+const eventListener = BluetoothSerial.addListener('onEnabledChanged' , (response: BluetoothState) => {
 
     const { enabled } = response;
     //Do something with enabled variable
@@ -175,12 +175,44 @@ None.
 BluetoothSerial
   .startEnabledNotifications()
   .then(() => {
-    removeListenerFunc = BluetoothSerial.addListener('onEnabledChanged', (data: BluetoothState) => {
+      eventListener = BluetoothSerial.addListener('onEnabledChanged', (data: BluetoothState) => {
         console.log('Bluetooth state changed to ' + (data.enabled ? 'Enabled' : 'Disabled'));
       });
   })
   .catch(() => {
     console.log('Error starting enabled listener');
+  });
+```
+
+
+## stopNotifications
+
+Stops the propagation of value changes.
+
+`stopNotifications(options: BluetoothDisableNotificationsOptions): Promise<void>`;
+
+### Description
+
+Function `stopNotifications` disable bluetooth state notifications. Additionally, the event listener has to be removed.
+
+```typescript
+eventListener.remove();
+```
+
+### Parameters
+
+None.
+
+### Quick Example
+
+```typescript
+BluetoothSerial
+  .stopEnabledNotifications()
+  .then(() => {
+      eventListener.remove();
+  })
+  .catch(() => {
+    console.log('Error disabling listener for device');
   });
 ```
 
@@ -440,7 +472,7 @@ Enable and be notified when any data is received.
 Function `startNotifications` enable notifications. In order to retrieve the values, use an Event Listener with 'onRead' as event name.
 
 ``` typescript
-const listener = BluetoothSerial.addListener('onRead' , (response: BluetoothReadResult) => {
+const eventListener = BluetoothSerial.addListener('onRead' , (response: BluetoothReadResult) => {
 
     const { value } = response;
     //Do something with the value
@@ -461,9 +493,9 @@ BluetoothSerial
     delimiter: '\n',
   })
   .then((result: BluetoothEnableNotificationsResult) => {
-    removeListenerFunc = BluetoothSerial.addListener('onRead', (data: BluetoothReadResult) => {
-        console.log(data.value);
-      });
+      eventListener = BluetoothSerial.addListener('onRead', (data: BluetoothReadResult) => {
+      console.log("Received value: " + data.value);
+    });
   })
   .catch(() => {
     console.log('Error enabling listener for device');
@@ -481,7 +513,7 @@ Stops the propagation of value changes.
 Function `stopNotifications` disable notifications. Additionally, the event listener has to be removed.
 
 ```typescript
-listener.remove();
+eventListener.remove();
 ```
 
 ### Parameters
@@ -496,7 +528,7 @@ BluetoothSerial
     address: '00:11:22:33:44:55',
   })
   .then(() => {
-    event.remove();
+    eventListener.remove();
   })
   .catch(() => {
     console.log('Error disabling listener for device');
