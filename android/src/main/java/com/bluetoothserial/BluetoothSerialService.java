@@ -1,5 +1,6 @@
 package com.bluetoothserial;
 
+import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
@@ -243,6 +244,7 @@ public class BluetoothSerialService {
         private Consumer<String> notificationCallback;
         private ConnectionStatus status;
 
+        @SuppressLint("MissingPermission")
         public BluetoothConnection(BluetoothDevice device, boolean secure, BluetoothSerialPlugin plugin) {
             this.device = device;
             this.secure = secure;
@@ -263,6 +265,7 @@ public class BluetoothSerialService {
             this.enabledNotifications = connection.enabledNotifications;
         }
 
+        @SuppressLint("MissingPermission")
         private void createRfcomm(BluetoothDevice device, boolean secure) {
             String socketType = secure ? "Secure" : "Insecure";
             Log.d(TAG, "BEGIN create socket SocketType:" + socketType);
