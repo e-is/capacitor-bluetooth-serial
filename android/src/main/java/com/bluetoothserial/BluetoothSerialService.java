@@ -240,7 +240,7 @@ public class BluetoothSerialService {
 
         private boolean enabledNotifications;
         private String notificationDelimiter;
-        private StringBuffer readBuffer;
+        private final StringBuffer readBuffer;
         private Consumer<String> notificationCallback;
         private ConnectionStatus status;
 
@@ -430,7 +430,7 @@ public class BluetoothSerialService {
             try {
                 return socket.getInputStream();
             } catch (IOException e) {
-                Log.e(TAG, "Erro ao obter inputStream", e);
+                Log.e(TAG, "Error while getting inputStream", e);
             }
 
             return null;
@@ -440,7 +440,7 @@ public class BluetoothSerialService {
             try {
                 return socket.getOutputStream();
             } catch (IOException e) {
-                Log.e(TAG, "Erro ao obter outputStream", e);
+                Log.e(TAG, "Error while getting outputStream", e);
             }
 
             return null;
