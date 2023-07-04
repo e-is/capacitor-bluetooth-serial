@@ -255,7 +255,7 @@
       },
       {
         "name": "addListener",
-        "signature": "(eventName: 'onRead', listenerFunc: (result: BluetoothReadResult) => void) => PluginListenerHandle",
+        "signature": "(eventName: 'onRead', listenerFunc: (result: BluetoothReadResult) => void) => Promise<PluginListenerHandle> & PluginListenerHandle",
         "parameters": [
           {
             "name": "eventName",
@@ -268,7 +268,7 @@
             "type": "(result: BluetoothReadResult) => void"
           }
         ],
-        "returns": "PluginListenerHandle",
+        "returns": "Promise<PluginListenerHandle> & PluginListenerHandle",
         "tags": [
           {
             "name": "since",
@@ -284,7 +284,7 @@
       },
       {
         "name": "addListener",
-        "signature": "(eventName: 'onEnabledChanged', listenerFunc: (result: BluetoothState) => void) => PluginListenerHandle",
+        "signature": "(eventName: 'onEnabledChanged', listenerFunc: (result: BluetoothState) => void) => Promise<PluginListenerHandle> & PluginListenerHandle",
         "parameters": [
           {
             "name": "eventName",
@@ -297,7 +297,7 @@
             "type": "(result: BluetoothState) => void"
           }
         ],
-        "returns": "PluginListenerHandle",
+        "returns": "Promise<PluginListenerHandle> & PluginListenerHandle",
         "tags": [
           {
             "name": "since",

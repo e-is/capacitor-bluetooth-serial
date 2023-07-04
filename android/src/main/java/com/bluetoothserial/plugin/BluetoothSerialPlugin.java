@@ -383,8 +383,7 @@ public class BluetoothSerialPlugin extends Plugin {
           }
         });
         call.resolve();
-            }
-            else {
+      } else {
         call.reject("Required Android API >= " + android.os.Build.VERSION_CODES.N);
       }
     } catch (IOException e) {
