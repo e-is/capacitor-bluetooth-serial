@@ -63,6 +63,7 @@ public class BluetoothSerialPlugin extends Plugin {
   private static final String TAG_PERMISSION = "permission";
 
   // Message constants
+  private static final String ERROR_DISABLED = "Bluetooth is disabled";
   private static final String ERROR_PERMISSION_DENIED = "Bluetooth permission denied";
   private static final String ERROR_ADDRESS_MISSING = "Device address property is required";
   private static final String ERROR_DEVICE_NOT_FOUND = "Device not found";
@@ -461,6 +462,11 @@ public class BluetoothSerialPlugin extends Plugin {
      */
     @PermissionCallback
     private void bluetoothPermissionsCallback(PluginCall call) {
+      if (call == null) {
+        Log.d(TAG_PERMISSION, "Bluetooth permission callback: missing plugin call (already resolved or rejected ?)");
+        return;
+      }
+
       if (getPermissionState() == PermissionState.GRANTED) {
         Log.d(TAG_PERMISSION, "Bluetooth permission granted");
         // Continue to the source method
@@ -505,15 +511,12 @@ public class BluetoothSerialPlugin extends Plugin {
 
     private boolean rejectIfDisabled(PluginCall call) {
         if (!checkBluetoothPermissions(call)) {
-            Log.e(getLogTag(), "App does not have permission to access bluetooth");
-            call.reject("App does not have permission to access bluetooth");
             return true;
         }
 
         if (isDisabled()) {
-            Log.e(getLogTag(), "Bluetooth is disabled");
-
-            call.reject("Bluetooth is disabled");
+            Log.e(getLogTag(), ERROR_DISABLED);
+            call.reject(ERROR_DISABLED);
             return true;
         }
 
