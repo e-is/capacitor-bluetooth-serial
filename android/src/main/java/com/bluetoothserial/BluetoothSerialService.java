@@ -307,6 +307,7 @@ public class BluetoothSerialService {
                         appendToBuffer(data);
                     } catch (IOException e) {
                         Log.e(TAG, "disconnected", e);
+                        disconnect();
                         break;
                     }
                 }
