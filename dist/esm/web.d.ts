@@ -2,6 +2,7 @@ import { WebPlugin } from '@capacitor/core';
 import { BluetoothConnectOptions, BluetoothConnectResult, BluetoothStopNotificationsOptions, BluetoothStartNotificationsOptions, BluetoothReadOptions, BluetoothReadResult, BluetoothReadUntilOptions, BluetoothScanResult, BluetoothSerialPlugin, BluetoothState, BluetoothWriteOptions } from './definitions';
 export declare class BluetoothSerialWeb extends WebPlugin implements BluetoothSerialPlugin {
     isEnabled(): Promise<BluetoothState>;
+    canEnable(): Promise<BluetoothState>;
     enable(): Promise<BluetoothState>;
     disable(): Promise<BluetoothState>;
     startEnabledNotifications(): Promise<void>;

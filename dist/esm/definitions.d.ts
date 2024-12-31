@@ -1,6 +1,17 @@
 import { PluginListenerHandle } from "@capacitor/core";
 export interface BluetoothSerialPlugin {
     isEnabled(): Promise<BluetoothState>;
+    /**
+     * Checks whether Bluetooth can be enabled on the device.
+     *
+     * @return {Promise<BluetoothState>} A promise that resolves to the current state of Bluetooth, indicating if it can be enabled.
+     */
+    canEnable(): Promise<BluetoothState>;
+    /**
+     * Enables the Bluetooth functionality on the device.
+     *
+     * @return {Promise<BluetoothState>} A promise that resolves to the current state of Bluetooth after enabling it, encapsulated as a `BluetoothState` object.
+     */
     enable(): Promise<BluetoothState>;
     /**
      * Disable bluetooth (turn bluetooth off)
