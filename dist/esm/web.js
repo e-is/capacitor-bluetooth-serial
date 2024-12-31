@@ -5,6 +5,10 @@ export class BluetoothSerialWeb extends WebPlugin {
         // not available on web
         return { enabled: true };
     }
+    async canEnable() {
+        // not available on web
+        return { enabled: false };
+    }
     async enable() {
         throw this.unavailable('enable is not available on web.');
     }

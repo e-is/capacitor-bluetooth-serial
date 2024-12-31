@@ -11,8 +11,9 @@ Supported platforms
 - [ ] iOS
 
 Supported Capacitor versions:
+- Capacitor 5 : use version 5.x
+- Capacitor 4 : use version 0.6.x
 - Capacitor <= 3: Please use [capacitor-bluetooth-serial](https://github.com/agro1desenvolvimento/capacitor-bluetooth-serial) (<= v0.0.3)
-- Capacitor 4 (v0.4.x)
 
 ## Usage
 
@@ -38,6 +39,7 @@ Interface and type definitions can be found [here](./src/definitions.ts).
 ## Methods
 
 - [BluetoothSerial.isEnabled](#isEnabled)
+- [BluetoothSerial.canEnable](#canEnable)
 - [BluetoothSerial.enable](#enable)
 - [BluetoothSerial.disable](#disable)
 - [BluetoothSerial.startEnabledNotifications](#startEnabledNotifications)
@@ -80,6 +82,34 @@ BluetoothSerial
   })
   .catch(() => {
     console.log('Error checking bluetooth status');
+  });
+```
+
+## canEnable
+
+Reports if bluetooth can be enabled.
+
+`canEnable(): Promise<BluetoothState>;`
+
+### Description
+
+Function `canEnable` calls the success whatever bluetooth can be enabled or not. The promise will contain an attribute `enabled` indicating if bluetooth can be enabled or *not*. The failure callback will be called only if an error occurs.
+
+### Parameters
+
+None.
+
+### Quick Example
+
+```typescript
+BluetoothSerial
+  .canEnable()
+  .then((response: BluetoothState) => {
+    const canEnable = response.enabled;
+    console.log(`Bluetooth can be enabled ? ${canEnable}`);
+  })
+  .catch(() => {
+    console.log('Error checking if bluetooth can be enabled');
   });
 ```
 

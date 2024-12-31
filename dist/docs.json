@@ -18,12 +18,34 @@
         "slug": "isenabled"
       },
       {
+        "name": "canEnable",
+        "signature": "() => Promise<BluetoothState>",
+        "parameters": [],
+        "returns": "Promise<BluetoothState>",
+        "tags": [
+          {
+            "name": "return",
+            "text": "A promise that resolves to the current state of Bluetooth, indicating if it can be enabled."
+          }
+        ],
+        "docs": "Checks whether Bluetooth can be enabled on the device.",
+        "complexTypes": [
+          "BluetoothState"
+        ],
+        "slug": "canenable"
+      },
+      {
         "name": "enable",
         "signature": "() => Promise<BluetoothState>",
         "parameters": [],
         "returns": "Promise<BluetoothState>",
-        "tags": [],
-        "docs": "",
+        "tags": [
+          {
+            "name": "return",
+            "text": "A promise that resolves to the current state of Bluetooth after enabling it, encapsulated as a `BluetoothState` object."
+          }
+        ],
+        "docs": "Enables the Bluetooth functionality on the device.",
         "complexTypes": [
           "BluetoothState"
         ],
@@ -280,7 +302,7 @@
           "PluginListenerHandle",
           "BluetoothReadResult"
         ],
-        "slug": "addlisteneronread"
+        "slug": "addlisteneronread-"
       },
       {
         "name": "addListener",
@@ -309,7 +331,7 @@
           "PluginListenerHandle",
           "BluetoothState"
         ],
-        "slug": "addlisteneronenabledchanged"
+        "slug": "addlisteneronenabledchanged-"
       },
       {
         "name": "removeAllListeners",
