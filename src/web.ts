@@ -21,6 +21,11 @@ export class BluetoothSerialWeb extends WebPlugin implements BluetoothSerialPlug
     return {enabled: true};
   }
 
+  async canEnable(): Promise<BluetoothState> {
+    // not available on web
+    return {enabled: false};
+  }
+
   async enable(): Promise<BluetoothState> {
     throw this.unavailable('enable is not available on web.');
   }
