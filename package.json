@@ -1,6 +1,6 @@
 {
   "name": "@e-is/capacitor-bluetooth-serial",
-  "version": "6.0.1",
+  "version": "6.0.2",
   "description": "Capacitor Bluetooth Serial Plugin",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",
