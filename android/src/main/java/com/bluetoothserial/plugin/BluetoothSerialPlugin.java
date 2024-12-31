@@ -84,6 +84,11 @@ public class BluetoothSerialPlugin extends Plugin {
   }
 
   @PluginMethod()
+  public void canEnable(PluginCall call) {
+    resolveState(call, getCanEnable();
+  }
+
+  @PluginMethod()
   @SuppressLint("MissingPermission")
   public void enable(PluginCall call) {
     // Already enabled: ok
@@ -92,10 +97,18 @@ public class BluetoothSerialPlugin extends Plugin {
       return;
     }
 
+    // Version prior API 31 (S) and after or equals 33 (TIRAMISU) cannot enable bluetooth
+    if (!getCanEnable()) {
+      Log.w(getLogTag(), "Enabling bluetooth are not allowed by API " + Build.VERSION.SDK_INT + " - skipping");
+      resolveState(call, false);
+      return;
+    }
+
     // Ask permission, and enable if need
     if (checkBluetoothPermissions(call)) {
       Log.d(getLogTag(), "Enabling bluetooth...");
       boolean enabled = bluetoothAdapter.enable();
+      Log.d(getLogTag(), "Enabling bluetooth " + (enabled ? "[OK]" : "[KO]"));
       resolveState(call, enabled);
     }
   }
@@ -106,6 +119,13 @@ public class BluetoothSerialPlugin extends Plugin {
     // Already disabled: ok
     if (isDisabled()) {
       resolveState(call, false);
+      return;
+    }
+
+    // Version prior API 31 (S) and after or equals 33 (TIRAMISU) cannot diable bluetooth
+    if (!getCanEnable()) {
+      Log.w(getLogTag(), "Enabling bluetooth are not allowed by API " + Build.VERSION.SDK_INT + " - skipping");
+      resolveState(call, true);
       return;
     }
 
@@ -570,6 +590,11 @@ public class BluetoothSerialPlugin extends Plugin {
     private String getPermissionAlias() {
         String alias = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) ? BLUETOOTH_API_31 : BLUETOOTH;
         return alias;
+    }
+
+    private boolean getCanEnable() {
+        // Version prior API 31 (S) and after or equals 33 (TIRAMISU) cannot enable bluetooth
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU;
     }
 
     private PermissionState getPermissionState() {
