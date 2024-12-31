@@ -85,7 +85,7 @@ public class BluetoothSerialPlugin extends Plugin {
 
   @PluginMethod()
   public void canEnable(PluginCall call) {
-    resolveState(call, getCanEnable();
+    resolveState(call, getCanEnable());
   }
 
   @PluginMethod()
