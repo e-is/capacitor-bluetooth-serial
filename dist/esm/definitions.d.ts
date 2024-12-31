@@ -42,12 +42,12 @@ export interface BluetoothSerialPlugin {
      * Listen for device input value
      * @since 0.0.5
      */
-    addListener(eventName: 'onRead', listenerFunc: (result: BluetoothReadResult) => void): Promise<PluginListenerHandle> & PluginListenerHandle;
+    addListener(eventName: 'onRead', listenerFunc: (result: BluetoothReadResult) => void): Promise<PluginListenerHandle>;
     /**
      * Listen for bluetooth state changed
      * @since 0.0.5
      */
-    addListener(eventName: 'onEnabledChanged', listenerFunc: (result: BluetoothState) => void): Promise<PluginListenerHandle> & PluginListenerHandle;
+    addListener(eventName: 'onEnabledChanged', listenerFunc: (result: BluetoothState) => void): Promise<PluginListenerHandle>;
     /**
     *
     * @since 0.0.5
