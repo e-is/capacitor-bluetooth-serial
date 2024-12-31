@@ -11,8 +11,9 @@ Supported platforms
 - [ ] iOS
 
 Supported Capacitor versions:
+- Capacitor 6 : use version 6.x
+- Capacitor 4 : use version 0.6.x
 - Capacitor <= 3: Please use [capacitor-bluetooth-serial](https://github.com/agro1desenvolvimento/capacitor-bluetooth-serial) (<= v0.0.3)
-- Capacitor 4 (v0.4.x)
 
 ## Usage
 
