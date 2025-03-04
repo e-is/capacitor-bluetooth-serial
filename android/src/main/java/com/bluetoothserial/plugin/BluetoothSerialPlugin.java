@@ -265,6 +265,29 @@ public class BluetoothSerialPlugin extends Plugin {
     getService().connect(device, this);
   }
 
+  @PluginMethod()
+  public void connectInsecure(PluginCall call) {
+    String address = getAddress(call);
+
+    if (address == null) {
+      call.reject(ERROR_ADDRESS_MISSING);
+      return;
+    }
+
+    if (rejectIfDisabled(call)) {
+      return;
+    }
+
+    BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
+    if (device == null) {
+      call.reject(ERROR_DEVICE_NOT_FOUND);
+      return;
+    }
+
+    connectCall = call;
+    getService().connectInsecure(device, this);
+  }
+
   public void connected() {
     if (connectCall != null) {
       connectCall.resolve();
