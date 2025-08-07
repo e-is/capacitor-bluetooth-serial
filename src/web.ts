@@ -1,5 +1,6 @@
-import {WebPlugin} from '@capacitor/core';
-import {
+import { WebPlugin } from '@capacitor/core';
+
+import type {
   BluetoothConnectOptions,
   BluetoothConnectResult,
   BluetoothStopNotificationsOptions,
@@ -10,20 +11,19 @@ import {
   BluetoothScanResult,
   BluetoothSerialPlugin,
   BluetoothState,
-  BluetoothWriteOptions
+  BluetoothWriteOptions,
 } from './definitions';
-import {OptionsRequiredError} from './utils/errors';
+import { OptionsRequiredError } from './utils/errors';
 
 export class BluetoothSerialWeb extends WebPlugin implements BluetoothSerialPlugin {
-
   async isEnabled(): Promise<BluetoothState> {
     // not available on web
-    return {enabled: true};
+    return { enabled: true };
   }
 
   async canEnable(): Promise<BluetoothState> {
     // not available on web
-    return {enabled: false};
+    return { enabled: false };
   }
 
   async enable(): Promise<BluetoothState> {
@@ -74,8 +74,7 @@ export class BluetoothSerialWeb extends WebPlugin implements BluetoothSerialPlug
     throw new Error('Method not implemented.');
   }
 
-  async read(options: BluetoothReadOptions):
-      Promise<BluetoothReadResult> {
+  async read(options: BluetoothReadOptions): Promise<BluetoothReadResult> {
     if (!options) {
       return Promise.reject(new OptionsRequiredError());
     }

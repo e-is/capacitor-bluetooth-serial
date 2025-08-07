@@ -1,10 +1,8 @@
 package com.bluetoothserial;
 
 import android.bluetooth.BluetoothDevice;
-
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
-
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.Set;
@@ -39,5 +37,4 @@ public class BluetoothDeviceHelper implements Serializable {
 
         return value.getBytes(StandardCharsets.UTF_8);
     }
-
 }

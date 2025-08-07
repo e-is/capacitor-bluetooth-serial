@@ -1,13 +1,13 @@
 var capacitorBluetoothSerialPlugin = (function (exports, core) {
     'use strict';
 
-    const BluetoothSerial$1 = core.registerPlugin('BluetoothSerial', {
-        web: () => Promise.resolve().then(function () { return web; }).then(m => new m.BluetoothSerialWeb()),
+    const BluetoothSerial = core.registerPlugin('BluetoothSerial', {
+        web: () => Promise.resolve().then(function () { return web; }).then((m) => new m.BluetoothSerialWeb()),
     });
 
     class OptionsRequiredError extends Error {
         constructor() {
-            super("This method requires an options argument");
+            super('This method requires an options argument');
         }
     }
 
@@ -90,17 +90,14 @@ var capacitorBluetoothSerialPlugin = (function (exports, core) {
             throw new Error('Method not implemented.');
         }
     }
-    const BluetoothSerial = new BluetoothSerialWeb();
+    new BluetoothSerialWeb();
 
     var web = /*#__PURE__*/Object.freeze({
         __proto__: null,
-        BluetoothSerialWeb: BluetoothSerialWeb,
-        BluetoothSerial: BluetoothSerial
+        BluetoothSerialWeb: BluetoothSerialWeb
     });
 
-    exports.BluetoothSerial = BluetoothSerial$1;
-
-    Object.defineProperty(exports, '__esModule', { value: true });
+    exports.BluetoothSerial = BluetoothSerial;
 
     return exports;
 

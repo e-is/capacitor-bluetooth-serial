@@ -1,7 +1,6 @@
-import {PluginListenerHandle} from "@capacitor/core";
+import type { PluginListenerHandle } from '@capacitor/core';
 
 export interface BluetoothSerialPlugin {
-
   isEnabled(): Promise<BluetoothState>;
 
   /**
@@ -60,24 +59,21 @@ export interface BluetoothSerialPlugin {
    * Listen for device input value
    * @since 0.0.5
    */
-  addListener(
-      eventName: 'onRead',
-      listenerFunc: (result: BluetoothReadResult) => void,
-  ): Promise<PluginListenerHandle>;
+  addListener(eventName: 'onRead', listenerFunc: (result: BluetoothReadResult) => void): Promise<PluginListenerHandle>;
 
   /**
    * Listen for bluetooth state changed
    * @since 0.0.5
    */
   addListener(
-      eventName: 'onEnabledChanged',
-      listenerFunc: (result: BluetoothState) => void,
+    eventName: 'onEnabledChanged',
+    listenerFunc: (result: BluetoothState) => void,
   ): Promise<PluginListenerHandle>;
 
   /**
-  *
-  * @since 0.0.5
-  */
+   *
+   * @since 0.0.5
+   */
   removeAllListeners(): Promise<void>;
 }
 
@@ -120,8 +116,8 @@ export interface BluetoothReadUntilOptions {
 }
 
 export interface BluetoothWriteOptions {
-    address: string;
-    value: string;
+  address: string;
+  value: string;
 }
 
 export interface BluetoothStartNotificationsOptions {

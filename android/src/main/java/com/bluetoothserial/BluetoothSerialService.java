@@ -6,9 +6,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.os.Build;
 import android.util.Log;
-
 import com.bluetoothserial.plugin.BluetoothSerialPlugin;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -20,6 +18,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 public class BluetoothSerialService {
+
     private static final UUID DEFAULT_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     private static final String TAG = "BluetoothSerialService";
 
@@ -50,7 +49,7 @@ public class BluetoothSerialService {
 
     public boolean disconnectAllDevices() {
         boolean success = true;
-        for(String address : connections.keySet()) {
+        for (String address : connections.keySet()) {
             success = success & disconnect(address);
         }
 
@@ -67,19 +66,19 @@ public class BluetoothSerialService {
 
         BluetoothConnection socket = getConnection(address);
 
-        if(socket == null) {
+        if (socket == null) {
             Log.e(TAG, "No connection found");
             return true;
         }
 
-        if(!socket.isConnected()) {
+        if (!socket.isConnected()) {
             Log.i(TAG, "Device is already disconnected");
         } else {
             return socket.disconnect();
         }
 
         BluetoothConnection connection = connections.get(address);
-        if(connection != null) {
+        if (connection != null) {
             connection.interrupt();
         }
 
@@ -94,7 +93,7 @@ public class BluetoothSerialService {
 
         BluetoothConnection socket = getConnection(address);
 
-        if(socket == null) {
+        if (socket == null) {
             Log.e(TAG, "No connection found");
             return false;
         }
@@ -109,14 +108,13 @@ public class BluetoothSerialService {
      * @param out  The bytes to write
      */
     public boolean write(String address, byte[] out) {
-
         BluetoothConnection r;
         // Synchronize a copy of the ConnectedThread
         synchronized (this) {
             r = getConnection(address);
         }
 
-        if(r == null || !r.isConnected()) {
+        if (r == null || !r.isConnected()) {
             return false;
         }
 
@@ -130,12 +128,12 @@ public class BluetoothSerialService {
         BluetoothConnection connection = getConnection(address);
 
         // TODO - criar exception customizada
-        if(connection == null) {
+        if (connection == null) {
             Log.e(TAG, "No connection found");
             throw new IOException("No connection found");
         }
 
-        if(!connection.isConnected()) {
+        if (!connection.isConnected()) {
             Log.e(TAG, "Not connected");
 
             throw new IOException("Not connected");
@@ -147,12 +145,12 @@ public class BluetoothSerialService {
     public String readUntil(String address, String delimiter) throws IOException {
         BluetoothConnection connection = getConnection(address);
 
-        if(connection == null) {
+        if (connection == null) {
             Log.e(TAG, "No connection found");
             throw new IOException("No connection found");
         }
 
-        if(!connection.isConnected()) {
+        if (!connection.isConnected()) {
             Log.e(TAG, "Not connected");
 
             throw new IOException("Not connected");
@@ -180,12 +178,12 @@ public class BluetoothSerialService {
     public void stopNotifications(String address) throws IOException {
         BluetoothConnection connection = getConnection(address);
 
-        if(connection == null) {
+        if (connection == null) {
             Log.e(TAG, "No connection found");
             throw new IOException("No connection found");
         }
 
-        if(!connection.isConnected()) {
+        if (!connection.isConnected()) {
             Log.e(TAG, "Not connected");
 
             throw new IOException("Not connected");
@@ -209,7 +207,7 @@ public class BluetoothSerialService {
     public void reconnectAll() {
         List<String> addresses = new ArrayList<>(connections.keySet());
 
-        for(String address : addresses) {
+        for (String address : addresses) {
             reconnect(address);
         }
     }
@@ -226,10 +224,11 @@ public class BluetoothSerialService {
     private enum ConnectionStatus {
         NOT_CONNECTED,
         CONNECTING,
-        CONNECTED;
+        CONNECTED
     }
 
     private class BluetoothConnection extends Thread {
+
         private final BluetoothDevice device;
         private final boolean secure;
         private final BluetoothSerialPlugin plugin;
@@ -271,7 +270,7 @@ public class BluetoothSerialService {
             Log.d(TAG, "BEGIN create socket SocketType:" + socketType);
             status = ConnectionStatus.CONNECTING;
             try {
-                if(secure) {
+                if (secure) {
                     socket = device.createRfcommSocketToServiceRecord(DEFAULT_UUID);
                 } else {
                     socket = device.createInsecureRfcommSocketToServiceRecord(DEFAULT_UUID);
@@ -349,7 +348,7 @@ public class BluetoothSerialService {
                 if (index >= 0) {
                     index += delimiter.length();
                     data = readBuffer.substring(0, index);
-                    readBuffer.delete(0, index+1);
+                    readBuffer.delete(0, index + 1);
                 }
             }
 
@@ -365,7 +364,6 @@ public class BluetoothSerialService {
         public synchronized void stopNotifications() {
             enabledNotifications = false;
         }
-
 
         /**
          * Write to the connected OutStream.
@@ -407,7 +405,6 @@ public class BluetoothSerialService {
             createRfcomm(device, secure);
             socketInputStream = getInputStream(socket);
             socketOutputStream = getOutputStream(socket);
-
         }
 
         private void connected() {

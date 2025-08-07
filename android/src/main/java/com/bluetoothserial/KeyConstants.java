@@ -1,6 +1,5 @@
 package com.bluetoothserial;
 
-
 public class KeyConstants {
 
     public static final String ENABLED = "enabled";
@@ -12,5 +11,4 @@ public class KeyConstants {
     // Events
     public static final String READ_EVENT = "onRead";
     public static final String ENABLED_CHANGED_EVENT = "onEnabledChanged";
-
 }
