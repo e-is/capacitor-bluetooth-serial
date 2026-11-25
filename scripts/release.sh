@@ -201,16 +201,27 @@ git add package.json package-lock.json README.md dist || exit 1
 git commit -m "Release $version" || exit 1
 git tag -a "$version" -m "$release_description" || exit 1
 
-# Merge into master (stable versions released from develop only)
+# Push the branch and the tag together (atomic: both or none), before anything else
+git push --atomic origin "$branch_origin" "refs/tags/$version" || exit 1
+
+# Merge into master (stable versions released from develop only, never from a maintenance branch 'v<major>.x')
 if [[ "$prerelease" == "false" && "$branch_origin" == "$DEVELOP_BRANCH" ]]; then
+  # A checkout silently overwrites the ignored files (e.g. '.local/env.sh') that are tracked on the other
+  # branch: refuse if any ignored local file is tracked on master
+  overwritten=$(comm -12 <(git ls-files --others --ignored --exclude-standard | sort) \
+                         <(git ls-tree -r --name-only origin/master | sort))
+  if [[ -n "$overwritten" ]]; then
+    echo ">> Cannot checkout 'master': these local (ignored) files are tracked on 'master', and would be overwritten:"
+    echo "$overwritten"
+    echo ">> Release $version is published and pushed: merge '$version' into 'master' manually"
+    exit 1
+  fi
   git checkout master || exit 1
   git pull --ff-only origin master || exit 1
   git merge --no-ff --no-edit -m "Release $version" "$version" || exit 1
   git push origin master || exit 1
   git checkout "$branch_origin" || exit 1
 fi
-git push origin "$branch_origin" || exit 1
-git push origin "refs/tags/$version" || exit 1
 
 if [[ -n "$GITHUB_TOKEN" ]]; then
   echo "----------------------------------"
