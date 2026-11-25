@@ -678,7 +678,7 @@ Function `write` writes data to the buffer.
 ### Parameters
 
 - { __address__ }: Identifier of the remote device.
-- { __value__ }: String to send (UTF-8 encoded), or array of bytes (integers from 0 to 255) (since 6.2.0).
+- { __value__ }: String to send (UTF-8 encoded), or array of bytes (integers from 0 to 255) (since 6.1.2).
 
 ### Quick Example
 
