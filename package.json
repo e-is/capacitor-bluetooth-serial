@@ -11,7 +11,7 @@
     "android/build.gradle",
     "dist/",
     "ios/Plugin/",
-    "CapacitorBluetoothSerial.podspec"
+    "EIsCapacitorBluetoothSerial.podspec"
   ],
   "scripts": {
     "verify": "npm run verify:ios && npm run verify:android && npm run verify:web",
@@ -28,7 +28,7 @@
     "clean": "rimraf ./dist",
     "watch": "tsc --watch",
     "prepublishOnly": "npm run build",
-    "publish:cocoapod": "pod trunk push ./CapacitorBluetoothSerial.podspec --allow-warnings",
+    "publish:cocoapod": "pod trunk push ./EIsCapacitorBluetoothSerial.podspec --allow-warnings",
     "test": "rimraf ./build-test && tsc -p tsconfig.test.json && node --test build-test/test/*.test.js"
   },
   "author": "Gerson Groth",
