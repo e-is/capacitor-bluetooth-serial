@@ -1,7 +1,6 @@
-import {PluginListenerHandle} from "@capacitor/core";
+import type { PluginListenerHandle } from '@capacitor/core';
 
 export interface BluetoothSerialPlugin {
-
   isEnabled(): Promise<BluetoothState>;
 
   /**
@@ -44,7 +43,9 @@ export interface BluetoothSerialPlugin {
 
   disconnect(options: BluetoothConnectOptions): Promise<void>;
 
-  isConnected(options: BluetoothConnectOptions): Promise<BluetoothConnectResult>;
+  isConnected(
+    options: BluetoothConnectOptions,
+  ): Promise<BluetoothConnectResult>;
 
   read(options: BluetoothReadOptions): Promise<BluetoothReadResult>;
 
@@ -52,7 +53,9 @@ export interface BluetoothSerialPlugin {
 
   write(options: BluetoothWriteOptions): Promise<void>;
 
-  startNotifications(options: BluetoothStartNotificationsOptions): Promise<void>;
+  startNotifications(
+    options: BluetoothStartNotificationsOptions,
+  ): Promise<void>;
 
   stopNotifications(options: BluetoothStopNotificationsOptions): Promise<void>;
 
@@ -61,8 +64,8 @@ export interface BluetoothSerialPlugin {
    * @since 0.0.5
    */
   addListener(
-      eventName: 'onRead',
-      listenerFunc: (result: BluetoothReadResult) => void,
+    eventName: 'onRead',
+    listenerFunc: (result: BluetoothReadResult) => void,
   ): Promise<PluginListenerHandle>;
 
   /**
@@ -70,14 +73,14 @@ export interface BluetoothSerialPlugin {
    * @since 0.0.5
    */
   addListener(
-      eventName: 'onEnabledChanged',
-      listenerFunc: (result: BluetoothState) => void,
+    eventName: 'onEnabledChanged',
+    listenerFunc: (result: BluetoothState) => void,
   ): Promise<PluginListenerHandle>;
 
   /**
-  *
-  * @since 0.0.5
-  */
+   *
+   * @since 0.0.5
+   */
   removeAllListeners(): Promise<void>;
 }
 
@@ -120,8 +123,8 @@ export interface BluetoothReadUntilOptions {
 }
 
 export interface BluetoothWriteOptions {
-    address: string;
-    value: string;
+  address: string;
+  value: string;
 }
 
 export interface BluetoothStartNotificationsOptions {
@@ -131,4 +134,42 @@ export interface BluetoothStartNotificationsOptions {
 
 export interface BluetoothStopNotificationsOptions {
   address: string;
+}
+
+/**
+ * Serial port, as listed by the host (e.g. Electron 'select-serial-port' event)
+ * @since 6.1.0
+ */
+export interface BluetoothSerialPortInfo {
+  portId: string;
+  portName: string;
+  displayName?: string;
+  vendorId?: string;
+  productId?: string;
+  serialNumber?: string;
+  deviceInstanceId?: string;
+  usbDriverName?: string;
+}
+
+/**
+ * Web implementation only: lets the host (e.g. an Electron app) list the serial ports and select one,
+ * while `navigator.serial.requestPort()` is pending.
+ *
+ * Must be exposed as `window.BluetoothSerialPortChooser` (e.g. by an Electron preload script, that relays
+ * the 'select-serial-port' session event). Without it, the web implementation can only use the ports
+ * already granted (`navigator.serial.getPorts()`).
+ * @since 6.1.0
+ */
+export interface BluetoothSerialPortChooser {
+  /**
+   * Listen the ports offered by the host, while a port request is pending.
+   * @return a function to stop listening
+   */
+  onPorts(callback: (ports: BluetoothSerialPortInfo[]) => void): () => void;
+
+  /**
+   * Select a port (by its `portId` or its `portName`), or cancel the pending request (null).
+   * If no request is pending yet, the port should be selected as soon as it is listed by the next request.
+   */
+  select(portIdOrName: string | null): Promise<boolean>;
 }

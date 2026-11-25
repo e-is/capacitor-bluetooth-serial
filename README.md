@@ -6,12 +6,12 @@ A client implementation for interacting with Bluetooth (serial), using Capacitor
 
 Supported platforms
 
-- [ ] Web
+- [x] Web (Chromium desktop, Electron) - using the [Web Serial API](https://developer.mozilla.org/docs/Web/API/Web_Serial_API) (since 6.1.0)
 - [x] Android
 - [ ] iOS
 
 Supported Capacitor versions:
-- Capacitor 6 : use version 6.x
+- Capacitor 6+ : use version 6.x
 - Capacitor 5 : use version 5.x
 - Capacitor 4 : use version 0.6.x
 - Capacitor <= 3: Please use [capacitor-bluetooth-serial](https://github.com/agro1desenvolvimento/capacitor-bluetooth-serial) (<= v0.0.3)
@@ -30,6 +30,105 @@ import {BluetoothSerial} from "@e-is/capacitor-bluetooth-serial";
 //...do something with plugin
 
 ```
+
+## Web and Electron (since 6.1.0)
+
+The web implementation uses the Web Serial API: Bluetooth Classic devices are reached through their
+RFCOMM serial port (Serial Port Profile). **The device must be paired by the OS first.**
+
+- `scan()` lists the Bluetooth serial ports only (other serial ports, e.g. `/dev/ttyS0`, are excluded).
+  The device `address` is its MAC address when the platform exposes it (Linux: port name, Windows: device
+  instance id), otherwise the port id.
+- `readUntil()` has the same semantics as on Android: the data up to the delimiter (included), or an empty
+  string if the delimiter has not been received yet.
+- `enable()`/`disable()` cannot switch the Bluetooth adapter: `isEnabled()` returns whether Web Serial is available.
+
+### Port chooser (Electron)
+
+Chromium asks the embedder to choose a port (`select-serial-port` session event). To let the plugin list
+the ports and select one by itself, the host must expose a `BluetoothSerialPortChooser` (see `definitions.ts`)
+as `window.BluetoothSerialPortChooser`.
+
+`connect()` selects the port **before** requesting it (`select(portIdOrMac)`, then `navigator.serial.requestPort()`):
+when no request is pending, the host must keep the selection, and apply it as soon as the port is listed.
+Each Chromium callback must be called only once. Example in Electron:
+
+```typescript
+// Main process
+let ports: Electron.SerialPort[] = [];
+let pendingCallback: ((portId: string) => void) | null = null;
+let preselected: string | null | undefined; // undefined = no selection in advance
+
+const matches = (port: Electron.SerialPort, key: string) => port.portId === key || port.portName === key; // portName = MAC (Linux)
+
+function select(key: string | null): boolean {
+  if (!pendingCallback) {
+    preselected = key; // No pending request: apply to the next one
+    return false;
+  }
+  const port = key ? ports.find((p) => matches(p, key)) : undefined;
+  if (key && !port) {
+    preselected = key; // Not listed yet: select it when listed
+    return false;
+  }
+  const callback = pendingCallback;
+  pendingCallback = null;
+  preselected = undefined;
+  callback(port?.portId || ''); // '' = cancel
+  return true;
+}
+
+function onPortsChanged() {
+  if (pendingCallback && preselected !== undefined && (preselected === null || ports.some((p) => matches(p, preselected)))) {
+    select(preselected);
+    return;
+  }
+  mainWindow.webContents.send('serial-ports', ports);
+}
+
+session.defaultSession.on('select-serial-port', (event, portList, _webContents, callback) => {
+  event.preventDefault();
+  ports = portList;
+  pendingCallback = callback;
+  onPortsChanged();
+});
+session.defaultSession.on('serial-port-added', (_event, port) => {
+  ports = [...ports.filter((p) => p.portId !== port.portId), port];
+  onPortsChanged();
+});
+session.defaultSession.on('serial-port-removed', (_event, port) => {
+  ports = ports.filter((p) => p.portId !== port.portId);
+  onPortsChanged();
+});
+// Allow getPorts() to return the ports already granted
+session.defaultSession.setDevicePermissionHandler((details) => details.deviceType === 'serial');
+
+ipcMain.handle('serial-select', (_event, portIdOrName: string | null) => select(portIdOrName));
+
+// Preload script
+contextBridge.exposeInMainWorld('BluetoothSerialPortChooser', {
+  onPorts: (callback) => {
+    const listener = (_e, ports) => callback(ports);
+    ipcRenderer.on('serial-ports', listener);
+    return () => ipcRenderer.removeListener('serial-ports', listener);
+  },
+  select: (portIdOrName) => ipcRenderer.invoke('serial-select', portIdOrName),
+});
+```
+
+Notes:
+
+- Web Serial over Bluetooth may need the Chromium feature `EnableBluetoothSerialPortProfileInSerialApi`
+  (`app.commandLine.appendSwitch('enable-features', 'EnableBluetoothSerialPortProfileInSerialApi')`).
+- `navigator.serial.requestPort()` requires a **user gesture** (e.g. a click), so `scan()` and the first `connect()`
+  to a device must follow a user action. To reconnect a known device without any user gesture (e.g. at startup),
+  the host can grant a user activation first, from the main process:
+  `await webContents.executeJavaScript('void 0', true /* userGesture */)`.
+- `scan()` rejects if the request fails for another reason than a cancellation (e.g. `SecurityError`).
+
+Without a chooser (e.g. in a browser), `scan()` and `connect()` open the browser native picker (user gesture required),
+and `scan()` returns the ports granted to the page. Their MAC address is not exposed: the device `address`
+(`web-serial-<index>`) depends on the order of the granted ports, and may change after a page reload.
 
 ## API Documentation
 
