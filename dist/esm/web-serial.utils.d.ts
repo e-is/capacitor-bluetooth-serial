@@ -37,5 +37,9 @@ export declare class SerialReadBuffer {
  * Returns true if the error is a cancelled port request (no port selected): 'NotFoundError' or 'AbortError'
  */
 export declare function isRequestCancelledError(err: any): boolean;
+/**
+ * Data to send: a string is UTF-8 encoded, an array must contain bytes (integers from 0 to 255)
+ */
+export declare function toWriteBytes(value: string | number[]): Uint8Array;
 export declare function sleep(ms: number): Promise<void>;
 export declare function withTimeout<T>(promise: Promise<T>, timeoutMs: number, message: string): Promise<T>;

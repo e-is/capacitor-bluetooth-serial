@@ -1,6 +1,6 @@
 import { WebPlugin } from '@capacitor/core';
 import { NotConnectedError, OptionsRequiredError } from './utils/errors';
-import { getPortAddress, isBluetoothSerialPort, isRequestCancelledError, SerialReadBuffer, sleep, SPP_SERVICE_CLASS_ID, withTimeout, } from './web-serial.utils';
+import { getPortAddress, isBluetoothSerialPort, isRequestCancelledError, SerialReadBuffer, sleep, SPP_SERVICE_CLASS_ID, toWriteBytes, withTimeout, } from './web-serial.utils';
 /**
  * Web implementation, using the Web Serial API (Chromium desktop, Electron).
  *
@@ -157,7 +157,7 @@ export class BluetoothSerialWeb extends WebPlugin {
         if (!options?.address)
             throw new OptionsRequiredError();
         const connection = this.getConnection(options.address);
-        const data = new TextEncoder().encode(options.value);
+        const data = toWriteBytes(options.value);
         // Queue the write, after the pending ones
         const write = connection.writes
             .catch(() => undefined)

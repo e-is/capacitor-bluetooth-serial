@@ -105,6 +105,22 @@ var capacitorBluetoothSerialPlugin = (function (exports, core) {
     function isRequestCancelledError(err) {
         return err?.name === 'NotFoundError' || err?.name === 'AbortError';
     }
+    /**
+     * Data to send: a string is UTF-8 encoded, an array must contain bytes (integers from 0 to 255)
+     */
+    function toWriteBytes(value) {
+        if (typeof value === 'string')
+            return new TextEncoder().encode(value);
+        if (Array.isArray(value)) {
+            value.forEach((byte, index) => {
+                if (!Number.isInteger(byte) || byte < 0 || byte > 255) {
+                    throw new Error(`Invalid byte at index ${index}: ${byte}`);
+                }
+            });
+            return Uint8Array.from(value);
+        }
+        throw new Error('Invalid value: must be a string, or an array of bytes (integers from 0 to 255)');
+    }
     function sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
@@ -274,7 +290,7 @@ var capacitorBluetoothSerialPlugin = (function (exports, core) {
             if (!options?.address)
                 throw new OptionsRequiredError();
             const connection = this.getConnection(options.address);
-            const data = new TextEncoder().encode(options.value);
+            const data = toWriteBytes(options.value);
             // Queue the write, after the pending ones
             const write = connection.writes
                 .catch(() => undefined)
