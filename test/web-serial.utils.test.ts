@@ -1,10 +1,11 @@
-import { deepStrictEqual, strictEqual } from 'node:assert';
+import { deepStrictEqual, strictEqual, throws } from 'node:assert';
 import { describe, it } from 'node:test';
 
 import {
   getPortAddress,
   isBluetoothSerialPort,
   SerialReadBuffer,
+  toWriteBytes,
 } from '../src/web-serial.utils';
 
 describe('SerialReadBuffer', () => {
@@ -87,5 +88,22 @@ describe('Bluetooth serial ports', () => {
       false,
     );
     strictEqual(getPortAddress({ portId: 'X', portName: 'ttyS0' }), 'X');
+  });
+});
+
+describe('toWriteBytes', () => {
+  it('should encode a string as UTF-8', () => {
+    deepStrictEqual(Array.from(toWriteBytes('é#')), [0xc3, 0xa9, 0x23]);
+  });
+
+  it('should accept an array of bytes', () => {
+    deepStrictEqual(Array.from(toWriteBytes([0, 0x10, 255])), [0, 0x10, 255]);
+  });
+
+  it('should reject invalid bytes', () => {
+    for (const value of [[-1], [256], [1.5], ['a'], [NaN]]) {
+      throws(() => toWriteBytes(value as any), /Invalid byte at index 0/);
+    }
+    throws(() => toWriteBytes({} as any), /Invalid value/);
   });
 });

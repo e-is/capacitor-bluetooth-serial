@@ -1,6 +1,6 @@
 {
   "name": "@e-is/capacitor-bluetooth-serial",
-  "version": "6.1.1",
+  "version": "8.0.0",
   "description": "Capacitor Bluetooth Serial Plugin",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",
@@ -11,7 +11,7 @@
     "android/build.gradle",
     "dist/",
     "ios/Plugin/",
-    "CapacitorBluetoothSerial.podspec"
+    "EIsCapacitorBluetoothSerial.podspec"
   ],
   "scripts": {
     "verify": "npm run verify:ios && npm run verify:android && npm run verify:web",
@@ -21,34 +21,34 @@
     "lint": "npm run eslint && npm run prettier -- --check && npm run swiftlint -- lint",
     "fmt": "npm run eslint -- --fix && npm run prettier -- --write && npm run swiftlint -- --fix --format",
     "eslint": "eslint . --ext ts",
-    "prettier": "prettier \"**/*.{css,html,ts,js,java}\"",
+    "prettier": "prettier \"**/*.{css,html,ts,js,java}\" --plugin=prettier-plugin-java",
     "swiftlint": "node-swiftlint",
     "docgen": "docgen --api BluetoothSerialPlugin --output-readme README.md --output-json dist/docs.json",
-    "build": "npm run clean && npm run docgen && tsc && rollup -c rollup.config.js",
+    "build": "npm run clean && npm run docgen && tsc && rollup -c rollup.config.mjs",
     "clean": "rimraf ./dist",
     "watch": "tsc --watch",
     "prepublishOnly": "npm run build",
-    "publish:cocoapod": "pod trunk push ./CapacitorBluetoothSerial.podspec --allow-warnings",
+    "publish:cocoapod": "pod trunk push ./EIsCapacitorBluetoothSerial.podspec --allow-warnings",
     "test": "rimraf ./build-test && tsc -p tsconfig.test.json && node --test build-test/test/*.test.js"
   },
   "author": "Gerson Groth",
   "license": "MIT",
   "devDependencies": {
-    "@capacitor/android": "^6.0.0",
-    "@capacitor/core": "^6.0.0",
-    "@capacitor/docgen": "^0.2.1",
-    "@capacitor/ios": "^6.0.0",
+    "@capacitor/android": "^8.0.0",
+    "@capacitor/core": "^8.0.0",
+    "@capacitor/docgen": "^0.3.1",
+    "@capacitor/ios": "^8.0.0",
     "@ionic/eslint-config": "^0.4.0",
-    "@ionic/prettier-config": "^1.0.1",
-    "@ionic/swiftlint-config": "^1.1.2",
-    "@types/node": "^22.20.5",
-    "eslint": "^8.57.0",
-    "prettier": "~2.3.0",
-    "prettier-plugin-java": "~1.0.2",
-    "rimraf": "^3.0.2",
-    "rollup": "^2.29.0",
-    "swiftlint": "^1.0.1",
-    "typescript": "~4.8.4"
+    "@ionic/prettier-config": "^4.0.0",
+    "@ionic/swiftlint-config": "^2.0.0",
+    "@types/node": "^24.10.1",
+    "eslint": "^8.57.1",
+    "prettier": "^3.6.2",
+    "prettier-plugin-java": "^2.7.7",
+    "rimraf": "^6.1.0",
+    "rollup": "^4.53.2",
+    "swiftlint": "^2.0.0",
+    "typescript": "^5.9.3"
   },
   "prettier": "@ionic/prettier-config",
   "swiftlint": "@ionic/swiftlint-config",
@@ -73,7 +73,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/e-is/capacitor-bluetooth-serial"
+    "url": "git+https://github.com/e-is/capacitor-bluetooth-serial.git"
   },
   "bugs": {
     "url": "https://github.com/e-is/capacitor-bluetooth-serial/issues"

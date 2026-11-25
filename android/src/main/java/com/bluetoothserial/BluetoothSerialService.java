@@ -349,7 +349,7 @@ public class BluetoothSerialService {
                 if (index >= 0) {
                     index += delimiter.length();
                     data = readBuffer.substring(0, index);
-                    readBuffer.delete(0, index+1);
+                    readBuffer.delete(0, index);
                 }
             }
 

@@ -540,10 +540,15 @@
         },
         {
           "name": "value",
-          "tags": [],
-          "docs": "",
+          "tags": [
+            {
+              "text": "6.1.2 (array of bytes)",
+              "name": "since"
+            }
+          ],
+          "docs": "Data to send: a string (UTF-8 encoded), or an array of bytes (integers from 0 to 255)",
           "complexTypes": [],
-          "type": "string"
+          "type": "string | number[]"
         }
       ]
     },

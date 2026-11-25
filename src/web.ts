@@ -24,6 +24,7 @@ import {
   SerialReadBuffer,
   sleep,
   SPP_SERVICE_CLASS_ID,
+  toWriteBytes,
   withTimeout,
 } from './web-serial.utils';
 
@@ -253,7 +254,7 @@ export class BluetoothSerialWeb
   async write(options: BluetoothWriteOptions): Promise<void> {
     if (!options?.address) throw new OptionsRequiredError();
     const connection = this.getConnection(options.address);
-    const data = new TextEncoder().encode(options.value);
+    const data = toWriteBytes(options.value);
 
     // Queue the write, after the pending ones
     const write = connection.writes
