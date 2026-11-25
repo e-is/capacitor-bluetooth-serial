@@ -542,7 +542,7 @@
           "name": "value",
           "tags": [
             {
-              "text": "6.2.0 (array of bytes)",
+              "text": "6.1.2 (array of bytes)",
               "name": "since"
             }
           ],

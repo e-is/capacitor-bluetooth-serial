@@ -88,7 +88,7 @@ export interface BluetoothWriteOptions {
     address: string;
     /**
      * Data to send: a string (UTF-8 encoded), or an array of bytes (integers from 0 to 255)
-     * @since 6.2.0 (array of bytes)
+     * @since 6.1.2 (array of bytes)
      */
     value: string | number[];
 }
