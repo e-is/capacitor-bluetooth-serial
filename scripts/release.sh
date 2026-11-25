@@ -1,6 +1,14 @@
 #!/bin/bash
 # Release the plugin: build, publish to npm, git flow (master + develop + tag), and GitHub release.
 #
+# One branch per Capacitor major version (= the plugin major version):
+#  - the most recent major is released from 'develop' (then merged into 'master')
+#  - older majors are released from their maintenance branch 'v<major>.x' (e.g. 'v6.x'), when it exists
+# Fixes go into the oldest maintenance branch, then are merged forward (v6.x -> v7.x -> develop).
+#
+# npm dist-tags: a stable version is tagged 'cap<major>' (e.g. 'cap6'), and also 'latest' if it is the
+# highest published version. A pre-release is only tagged 'alpha', 'beta' or 'rc'.
+#
 # Usage: scripts/release.sh <version> [<release_description>] [options]
 #  - version             : x.y.z (or x.y.z-alphaN / -betaN / -rcN)
 #  - release_description : a comment on the release (default: 'Release <version>')
@@ -27,7 +35,7 @@ if [[ -f "${PROJECT_DIR}/.local/env.sh" ]]; then
 fi
 
 GITHUB_REPO="e-is/capacitor-bluetooth-serial"
-BRANCH_ORIGIN="develop"
+DEVELOP_BRANCH="develop"
 
 # Read parameters
 skip_confirm=0
@@ -58,22 +66,47 @@ if [[ ! $version =~ ^[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta|rc)[0-9]+)?$ ]]; then
 fi
 [[ -z "$release_description" ]] && release_description="Release $version"
 
-# Pre-release: publish with the npm tag 'alpha', 'beta' or 'rc' (not 'latest')
-npm_options=""
-prerelease=false
-if [[ $version =~ -(alpha|beta|rc)[0-9]+$ ]]; then
-  npm_options="--tag ${BASH_REMATCH[1]}"
-  prerelease=true
-fi
-[[ $dry_run -eq 1 ]] && npm_options="$npm_options --dry-run"
-
 package=$(node -p "require('./package.json').name") || exit 1
 current=$(node -p "require('./package.json').version") || exit 1
+major=${version%%.*}
+
+# npm dist-tag: 'cap<major>' for a stable version, 'alpha', 'beta' or 'rc' for a pre-release
+prerelease=false
+npm_tag="cap${major}"
+if [[ $version =~ -(alpha|beta|rc)[0-9]+$ ]]; then
+  npm_tag="${BASH_REMATCH[1]}"
+  prerelease=true
+fi
+npm_options="--tag $npm_tag"
+[[ $dry_run -eq 1 ]] && npm_options="$npm_options --dry-run"
+
+# Also tag 'latest', if this stable version is higher than the current 'latest'
+latest=$(npm view "$package" dist-tags.latest 2>/dev/null)
+set_latest=false
+if [[ "$prerelease" == "false" ]]; then
+  if [[ -z "$latest" || "$(printf '%s\n%s\n' "$latest" "$version" | sort -V | tail -n 1)" == "$version" ]]; then
+    set_latest=true
+  fi
+fi
+
+# Origin branch: the maintenance branch 'v<major>.x' if it exists, otherwise 'develop'
+git fetch origin || exit 1
+branch_origin="$DEVELOP_BRANCH"
+if git rev-parse -q --verify "refs/remotes/origin/v${major}.x" >/dev/null; then
+  branch_origin="v${major}.x"
+fi
 
 # Checks
 branch=$(git rev-parse --abbrev-ref HEAD)
-if [[ "$branch" != "$BRANCH_ORIGIN" ]]; then
-  echo ">> This script must be run on the '$BRANCH_ORIGIN' branch (current branch: $branch)"
+if [[ "$branch" != "$branch_origin" ]]; then
+  echo ">> Version $version must be released from the '$branch_origin' branch (current branch: $branch)"
+  exit 1
+fi
+# Changing the major version on develop requires a maintenance branch for the previous major
+if [[ "$branch_origin" == "$DEVELOP_BRANCH" && "${current%%.*}" != "$major" ]] \
+  && ! git rev-parse -q --verify "refs/remotes/origin/v${current%%.*}.x" >/dev/null; then
+  echo ">> Cannot change the major version on '$DEVELOP_BRANCH' ($current -> $version) without a maintenance branch 'v${current%%.*}.x'"
+  echo ">> Create it first: git push origin $DEVELOP_BRANCH:v${current%%.*}.x"
   exit 1
 fi
 # ('.local/' is ignored: local settings, never committed by this script)
@@ -82,9 +115,8 @@ if [[ -n $(git status --porcelain --untracked-files=no -- . ':!.local') ]]; then
   git status --short --untracked-files=no -- . ':!.local'
   exit 1
 fi
-git fetch origin || exit 1
-if [[ "$(git rev-parse HEAD)" != "$(git rev-parse origin/$BRANCH_ORIGIN)" ]]; then
-  echo ">> The '$BRANCH_ORIGIN' branch is not up to date with 'origin/$BRANCH_ORIGIN'"
+if [[ "$(git rev-parse HEAD)" != "$(git rev-parse "origin/$branch_origin")" ]]; then
+  echo ">> The '$branch_origin' branch is not up to date with 'origin/$branch_origin'"
   exit 1
 fi
 if git rev-parse -q --verify "refs/tags/$version" >/dev/null; then
@@ -113,7 +145,8 @@ echo "- Package:         $package"
 echo "- Current version: $current"
 echo "- Release version: $version"
 echo "- Description:     $release_description"
-echo "- npm options:     ${npm_options:-(none)}"
+echo "- Branch:          $branch_origin"
+echo "- npm dist-tags:   $npm_tag$([[ "$set_latest" == "true" ]] && echo ", latest") (current latest: ${latest:-none})"
 echo "----------------------------------"
 if [[ $skip_confirm -eq 0 ]]; then
   read -r -p "Is this correct? [y/N] " response
@@ -139,6 +172,9 @@ echo "- Publish to npm..."
 echo "----------------------------------"
 # --ignore-scripts: the build has already been done above (skip 'prepublishOnly')
 npm publish --access public --ignore-scripts $npm_options || exit 1
+if [[ "$set_latest" == "true" && $dry_run -eq 0 ]]; then
+  npm dist-tag add "$package@$version" latest || exit 1
+fi
 
 if [[ $dry_run -eq 1 ]]; then
   echo "----------------------------------"
@@ -157,15 +193,15 @@ git add package.json package-lock.json README.md dist || exit 1
 git commit -m "Release $version" || exit 1
 git tag -a "$version" -m "$release_description" || exit 1
 
-# Merge into master (stable versions only)
-if [[ "$prerelease" == "false" ]]; then
+# Merge into master (stable versions released from develop only)
+if [[ "$prerelease" == "false" && "$branch_origin" == "$DEVELOP_BRANCH" ]]; then
   git checkout master || exit 1
   git pull --ff-only origin master || exit 1
   git merge --no-ff --no-edit -m "Release $version" "$version" || exit 1
   git push origin master || exit 1
-  git checkout "$BRANCH_ORIGIN" || exit 1
+  git checkout "$branch_origin" || exit 1
 fi
-git push origin "$BRANCH_ORIGIN" || exit 1
+git push origin "$branch_origin" || exit 1
 git push origin "refs/tags/$version" || exit 1
 
 if [[ -n "$GITHUB_TOKEN" ]]; then
@@ -173,8 +209,8 @@ if [[ -n "$GITHUB_TOKEN" ]]; then
   echo "- Create GitHub release..."
   echo "----------------------------------"
   payload=$(jq -n --arg tag "$version" --arg name "$version" --arg body "$release_description" \
-    --argjson prerelease "$prerelease" \
-    '{tag_name: $tag, name: $name, body: $body, prerelease: $prerelease, generate_release_notes: true}') || exit 1
+    --argjson prerelease "$prerelease" --arg make_latest "$set_latest" \
+    '{tag_name: $tag, name: $name, body: $body, prerelease: $prerelease, make_latest: $make_latest, generate_release_notes: true}') || exit 1
   http_code=$(curl -s -o /tmp/github-release-$$.json -w "%{http_code}" -X POST \
     -H "Authorization: Bearer ${GITHUB_TOKEN}" \
     -H "Accept: application/vnd.github+json" \
