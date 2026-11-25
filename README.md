@@ -11,6 +11,7 @@ Supported platforms
 - [ ] iOS
 
 Supported Capacitor versions (the plugin major version follows the Capacitor major version):
+- Capacitor 7 : use version 7.x (`npm install @e-is/capacitor-bluetooth-serial@cap7`)
 - Capacitor 6 : use version 6.x (`npm install @e-is/capacitor-bluetooth-serial@cap6`)
 - Capacitor 5 : use version 5.x
 - Capacitor 4 : use version 0.6.x
