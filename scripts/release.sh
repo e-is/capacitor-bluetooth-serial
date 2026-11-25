@@ -90,7 +90,7 @@ if [[ "$prerelease" == "false" ]]; then
 fi
 
 # Origin branch: the maintenance branch 'v<major>.x' if it exists, otherwise 'develop'
-git fetch origin || exit 1
+git fetch origin --tags || exit 1
 branch_origin="$DEVELOP_BRANCH"
 if git rev-parse -q --verify "refs/remotes/origin/v${major}.x" >/dev/null; then
   branch_origin="v${major}.x"
@@ -100,6 +100,13 @@ fi
 branch=$(git rev-parse --abbrev-ref HEAD)
 if [[ "$branch" != "$branch_origin" ]]; then
   echo ">> Version $version must be released from the '$branch_origin' branch (current branch: $branch)"
+  exit 1
+fi
+# On a maintenance branch, the code must already be at this major version (e.g. 'v7.x' must contain the
+# Capacitor 7 migration, with version 7.x in package.json): never release a version from a branch of another major
+if [[ "$branch_origin" != "$DEVELOP_BRANCH" && "${current%%.*}" != "$major" ]]; then
+  echo ">> The '$branch_origin' branch is at version $current: it does not contain the $major.x code yet"
+  echo ">> (e.g. merge the Capacitor $major migration into '$branch_origin' first)"
   exit 1
 fi
 # Changing the major version on develop requires a maintenance branch for the previous major
@@ -119,7 +126,8 @@ if [[ "$(git rev-parse HEAD)" != "$(git rev-parse "origin/$branch_origin")" ]]; 
   echo ">> The '$branch_origin' branch is not up to date with 'origin/$branch_origin'"
   exit 1
 fi
-if git rev-parse -q --verify "refs/tags/$version" >/dev/null; then
+if git rev-parse -q --verify "refs/tags/$version" >/dev/null \
+  || [[ -n "$(git ls-remote --tags origin "refs/tags/$version")" ]]; then
   echo ">> Git tag '$version' already exists"
   exit 1
 fi
@@ -230,3 +238,16 @@ fi
 echo "----------------------------------"
 echo "- Release $version OK"
 echo "----------------------------------"
+
+# Maintenance branch: the fixes must be merged forward, into the next major branch
+if [[ "$branch_origin" != "$DEVELOP_BRANCH" ]]; then
+  next_branch="$DEVELOP_BRANCH"
+  for next_major in $(seq $((major + 1)) $((major + 5))); do
+    if git rev-parse -q --verify "refs/remotes/origin/v${next_major}.x" >/dev/null; then
+      next_branch="v${next_major}.x"
+      break
+    fi
+  done
+  echo "Next step: merge '$branch_origin' into '$next_branch' (keep the version of '$next_branch' in package.json):"
+  echo "  git checkout $next_branch && git pull && git merge --no-ff $branch_origin && git push origin $next_branch"
+fi
