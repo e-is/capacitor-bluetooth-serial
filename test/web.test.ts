@@ -190,6 +190,17 @@ describe('BluetoothSerialWeb', () => {
     deepStrictEqual(port().written, ['a', 'b']);
   });
 
+  it('write() should send an array of bytes', async () => {
+    await plugin.connect({ address: MAC });
+    await plugin.write({ address: MAC, value: [0x48, 0x69, 0x23] });
+    deepStrictEqual(port().written, ['Hi#']);
+    await rejects(
+      plugin.write({ address: MAC, value: [0x48, 256] }),
+      /Invalid byte at index 1/,
+    );
+    deepStrictEqual(port().written, ['Hi#']);
+  });
+
   it('should stay connected after a recoverable read error', async () => {
     await plugin.connect({ address: MAC });
     const values: string[] = [];

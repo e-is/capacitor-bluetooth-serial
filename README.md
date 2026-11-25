@@ -10,8 +10,8 @@ Supported platforms
 - [x] Android
 - [ ] iOS
 
-Supported Capacitor versions:
-- Capacitor 6+ : use version 6.x
+Supported Capacitor versions (the plugin major version follows the Capacitor major version):
+- Capacitor 6 : use version 6.x (`npm install @e-is/capacitor-bluetooth-serial@cap6`)
 - Capacitor 5 : use version 5.x
 - Capacitor 4 : use version 0.6.x
 - Capacitor <= 3: Please use [capacitor-bluetooth-serial](https://github.com/agro1desenvolvimento/capacitor-bluetooth-serial) (<= v0.0.3)
@@ -678,7 +678,7 @@ Function `write` writes data to the buffer.
 ### Parameters
 
 - { __address__ }: Identifier of the remote device.
-- { __value__ }: String to send.
+- { __value__ }: String to send (UTF-8 encoded), or array of bytes (integers from 0 to 255) (since 6.2.0).
 
 ### Quick Example
 
@@ -694,4 +694,12 @@ BluetoothSerial
   .catch(() => {
     console.log('Error writing data to device');
   });
+```
+
+```typescript
+// Send raw bytes
+await BluetoothSerial.write({
+  address: '00:11:22:33:44:55',
+  value: [0x02, 0x10, 0xff],
+});
 ```
