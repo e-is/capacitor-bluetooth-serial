@@ -1,7 +1,7 @@
 var capacitorBluetoothSerialPlugin = (function (exports, core) {
     'use strict';
 
-    const BluetoothSerial$1 = core.registerPlugin('BluetoothSerial', {
+    const BluetoothSerial = core.registerPlugin('BluetoothSerial', {
         web: () => Promise.resolve().then(function () { return web; }).then(m => new m.BluetoothSerialWeb()),
     });
 
@@ -469,17 +469,14 @@ var capacitorBluetoothSerialPlugin = (function (exports, core) {
     BluetoothSerialWeb.SCAN_SETTLE_MS = 500;
     BluetoothSerialWeb.CONNECT_TIMEOUT_MS = 10000;
     BluetoothSerialWeb.BAUD_RATE = 9600;
-    const BluetoothSerial = new BluetoothSerialWeb();
+    new BluetoothSerialWeb();
 
     var web = /*#__PURE__*/Object.freeze({
         __proto__: null,
-        BluetoothSerialWeb: BluetoothSerialWeb,
-        BluetoothSerial: BluetoothSerial
+        BluetoothSerialWeb: BluetoothSerialWeb
     });
 
-    exports.BluetoothSerial = BluetoothSerial$1;
-
-    Object.defineProperty(exports, '__esModule', { value: true });
+    exports.BluetoothSerial = BluetoothSerial;
 
     return exports;
 
