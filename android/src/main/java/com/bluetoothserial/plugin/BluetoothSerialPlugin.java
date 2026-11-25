@@ -35,6 +35,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import org.json.JSONArray;
+
 @CapacitorPlugin(
   name = "BluetoothSerial",
   permissions = {
@@ -71,6 +73,7 @@ public class BluetoothSerialPlugin extends Plugin {
   private static final String ERROR_CONNECTION_FAILED = "Failed to connect to the device";
   private static final String ERROR_DISCONNECT_FAILED = "Failed to disconnect from the device";
   private static final String ERROR_WRITING = "Failed to send data to the device";
+  private static final String ERROR_INVALID_VALUE = "Invalid value: must be a string, or an array of bytes (integers from 0 to 255)";
 
   private BluetoothAdapter bluetoothAdapter;
   private BluetoothSerialService service;
@@ -344,10 +347,24 @@ public class BluetoothSerialPlugin extends Plugin {
       return;
     }
 
-    String value = call.getString(KeyConstants.VALUE);
-    Log.i(getLogTag(), value);
+    byte[] data;
+    try {
+      // The value can be a string (UTF-8 encoded), or an array of bytes (numbers 0-255)
+      Object value = call.getData().opt(KeyConstants.VALUE);
+      if (value instanceof JSONArray) {
+        data = BluetoothDeviceHelper.toByteArray((JSONArray) value);
+      } else if (value instanceof String) {
+        data = BluetoothDeviceHelper.toByteArray((String) value);
+      } else {
+        call.reject(ERROR_INVALID_VALUE);
+        return;
+      }
+    } catch (IllegalArgumentException e) {
+      call.reject(ERROR_INVALID_VALUE, e);
+      return;
+    }
 
-    boolean success = getService().write(address, BluetoothDeviceHelper.toByteArray(value));
+    boolean success = getService().write(address, data);
 
     if (success) {
       call.resolve();

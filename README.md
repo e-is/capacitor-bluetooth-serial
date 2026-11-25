@@ -678,7 +678,7 @@ Function `write` writes data to the buffer.
 ### Parameters
 
 - { __address__ }: Identifier of the remote device.
-- { __value__ }: String to send.
+- { __value__ }: String to send (UTF-8 encoded), or array of bytes (integers from 0 to 255) (since 6.2.0).
 
 ### Quick Example
 
@@ -694,4 +694,12 @@ BluetoothSerial
   .catch(() => {
     console.log('Error writing data to device');
   });
+```
+
+```typescript
+// Send raw bytes
+await BluetoothSerial.write({
+  address: '00:11:22:33:44:55',
+  value: [0x02, 0x10, 0xff],
+});
 ```

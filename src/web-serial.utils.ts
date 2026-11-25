@@ -103,6 +103,24 @@ export function isRequestCancelledError(err: any): boolean {
   return err?.name === 'NotFoundError' || err?.name === 'AbortError';
 }
 
+/**
+ * Data to send: a string is UTF-8 encoded, an array must contain bytes (integers from 0 to 255)
+ */
+export function toWriteBytes(value: string | number[]): Uint8Array {
+  if (typeof value === 'string') return new TextEncoder().encode(value);
+  if (Array.isArray(value)) {
+    value.forEach((byte, index) => {
+      if (!Number.isInteger(byte) || byte < 0 || byte > 255) {
+        throw new Error(`Invalid byte at index ${index}: ${byte}`);
+      }
+    });
+    return Uint8Array.from(value);
+  }
+  throw new Error(
+    'Invalid value: must be a string, or an array of bytes (integers from 0 to 255)',
+  );
+}
+
 export function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
