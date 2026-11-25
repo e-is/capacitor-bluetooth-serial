@@ -116,10 +116,13 @@ if [[ "$branch_origin" == "$DEVELOP_BRANCH" && "${current%%.*}" != "$major" ]] \
   echo ">> Create it first: git push origin $DEVELOP_BRANCH:v${current%%.*}.x"
   exit 1
 fi
-# ('.local/' is ignored: local settings, never committed by this script)
-if [[ -n $(git status --porcelain --untracked-files=no -- . ':!.local') ]]; then
+# Ignored here:
+# - '.local/': local settings, never committed by this script
+# - 'package.json' and 'package-lock.json': the version may have been updated by hand (committed with the release)
+uncommitted_excludes=(':!.local' ':!package.json' ':!package-lock.json')
+if [[ -n $(git status --porcelain --untracked-files=no -- . "${uncommitted_excludes[@]}") ]]; then
   echo ">> There are uncommitted changes. Please commit (or stash) them before the release:"
-  git status --short --untracked-files=no -- . ':!.local'
+  git status --short --untracked-files=no -- . "${uncommitted_excludes[@]}"
   exit 1
 fi
 if [[ "$(git rev-parse HEAD)" != "$(git rev-parse "origin/$branch_origin")" ]]; then
@@ -164,9 +167,11 @@ fi
 echo "----------------------------------"
 echo "- Update version..."
 echo "----------------------------------"
-if [[ "$version" != "$current" ]]; then
-  npm version "$version" --no-git-tag-version || exit 1
-fi
+# Keep a copy of the package files (restored after a dry run, with the changes made by hand, if any)
+backup_dir=$(mktemp -d) || exit 1
+cp package.json package-lock.json "$backup_dir/" || exit 1
+# Also when the version is already set by hand: keep package-lock.json in sync
+npm version "$version" --no-git-tag-version --allow-same-version || exit 1
 
 echo "----------------------------------"
 echo "- Build..."
@@ -188,8 +193,10 @@ if [[ $dry_run -eq 1 ]]; then
   echo "----------------------------------"
   echo "- Dry run OK. Restoring files..."
   echo "----------------------------------"
-  git checkout -- package.json package-lock.json README.md dist || exit 1
+  git checkout -- README.md dist || exit 1
   git clean -fdq -- dist || exit 1
+  cp "$backup_dir/package.json" "$backup_dir/package-lock.json" . || exit 1
+  rm -rf "$backup_dir"
   exit 0
 fi
 
@@ -197,8 +204,14 @@ echo "----------------------------------"
 echo "- Git commit, tag and push..."
 echo "----------------------------------"
 # Add the release files explicitly (never 'git commit -a': '.local/env.sh' holds secrets)
-git add package.json package-lock.json README.md dist || exit 1
-git commit -m "Release $version" || exit 1
+rm -rf "$backup_dir"
+git add -A -- package.json package-lock.json README.md dist || exit 1
+if git diff --cached --quiet; then
+  # E.g. the version was already committed by hand, and the build gives the same files
+  echo "Nothing to commit: the release tag will be put on the current commit"
+else
+  git commit -m "Release $version" || exit 1
+fi
 git tag -a "$version" -m "$release_description" || exit 1
 
 # Push the branch and the tag together (atomic: both or none), before anything else
