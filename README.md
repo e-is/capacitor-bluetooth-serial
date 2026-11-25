@@ -17,6 +17,12 @@ Supported Capacitor versions (the plugin major version follows the Capacitor maj
 - Capacitor 4 : use version 0.6.x
 - Capacitor <= 3: Please use [capacitor-bluetooth-serial](https://github.com/agro1desenvolvimento/capacitor-bluetooth-serial) (<= v0.0.3)
 
+Each major version has the same features and fixes (web platform since 6.1.0, all fixes since 6.1.2). The 7.x version
+requires a Capacitor 7 app: Android with JDK 21, `minSdkVersion` 23 and `compileSdkVersion` 35 (iOS 14).
+
+Each version is maintained on its own branch: `v6.x` (Capacitor 6), `v7.x` (Capacitor 7), `develop` (latest Capacitor).
+Fixes are done on the oldest supported branch, then merged forward (`v6.x` → `v7.x` → `develop`).
+
 ## Usage
 
 Install the plugin via npm
