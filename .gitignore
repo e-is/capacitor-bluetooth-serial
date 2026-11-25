@@ -77,3 +77,6 @@ fastlane/readme.md
 ehthumbs.db
 Thumbs.db
 build-test
+
+# Local environment
+.local/env.sh
