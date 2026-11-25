@@ -22,6 +22,7 @@ Each major version has the same features and fixes (e.g. the web platform, since
 of the same Capacitor major version:
 - 8.x: Android with JDK 21, `minSdkVersion` 24 and `compileSdkVersion` 36 (iOS 15)
 - 7.x: Android with JDK 21, `minSdkVersion` 23 and `compileSdkVersion` 35 (iOS 14)
+- 6.x: Android with JDK 17, `minSdkVersion` 22 and `compileSdkVersion` 34 (iOS 13)
 
 Each version is maintained on its own branch: `v6.x` (Capacitor 6), `v7.x` (Capacitor 7), `develop` (Capacitor 8).
 Fixes are done on the oldest supported branch, then merged forward (`v6.x` → `v7.x` → `develop`).
